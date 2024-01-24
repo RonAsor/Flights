@@ -36,7 +36,7 @@ def configure_routes(app):
     def test1():
         session = Session()
         repo = Repository(session)
-        test = repo.get_tickets_by_customer(1)
+        test = repo.get_tickets_by_customer(3)
         session.close()
         return test
         #working for get_tickets_by_customer(customer_id:int)

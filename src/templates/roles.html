@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Roles</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h1>User Roles</h1>
@@ -19,8 +20,8 @@
         <tbody>
             {% for role in user_roles %}
             <tr>
-                <td>{{ role.Id }}</td>
-                <td>{{ role.Role_Name }}</td>
+                <td>{{ role.id }}</td>
+                <td>{{ role.role_name }}</td>
             </tr>
             {% endfor %}
         </tbody>

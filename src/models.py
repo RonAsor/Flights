@@ -8,70 +8,70 @@ Base = declarative_base()
 class Countries(Base):
     __tablename__ = 'countries'
 
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    Country_Name = Column(String(255), unique=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    country_name = Column(String(255), unique=True)
 
 class UserRoles(Base):
     __tablename__ = 'user_roles'
 
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    Role_Name = Column(String(255), unique=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    role_name = Column(String(255), unique=True)
 
 class Users(Base):
     __tablename__ = 'users'
 
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    Username = Column(String(255), unique=True)
-    Password = Column(Text)
-    Email = Column(String(255), unique=True)
-    User_Role = Column(Integer, ForeignKey('user_roles.Id'))
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(255), unique=True)
+    password = Column(Text)
+    email = Column(String(255), unique=True)
+    user_role = Column(Integer, ForeignKey('user_roles.id'))
 
 class AirlineCompanies(Base):
     __tablename__ = 'airline_companies'
 
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    Airline_Name = Column(String(255), unique=True)
-    Country_Id = Column(Integer, ForeignKey('countries.Id'))
-    User_Id = Column(Integer, ForeignKey('users.Id'))
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    airline_name = Column(String(255), unique=True)
+    country_id = Column(Integer, ForeignKey('countries.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
 
 class Customers(Base):
     __tablename__ = 'customers'
 
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    First_Name = Column(Text)
-    Last_Name = Column(Text)
-    Address = Column(Text)
-    Phone_No = Column(String(255), unique=True)
-    Credit_Card_No = Column(String(255), unique=True)
-    User_Id = Column(Integer, ForeignKey('users.Id'), unique=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    first_name = Column(Text)
+    last_name = Column(Text)
+    address = Column(Text)
+    phone_no = Column(String(255), unique=True)
+    credit_card_mo = Column(String(255), unique=True)
+    user_id = Column(Integer, ForeignKey('users.id'), unique=True)
 
 class Administrators(Base):
     __tablename__ = 'administrators'
 
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    First_Name = Column(Text)
-    Last_Name = Column(Text)
-    User_Id = Column(Integer, ForeignKey('users.Id'))
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    first_name = Column(Text)
+    last_name = Column(Text)
+    user_id = Column(Integer, ForeignKey('users.id'))
 
 class Flights(Base):
     __tablename__ = 'flights'
 
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    Airline_Company_Id = Column(Integer, ForeignKey('airline_companies.Id'))
-    Origin_Country_Id = Column(Integer, ForeignKey('countries.Id'))
-    Destination_Country_Id = Column(Integer, ForeignKey('countries.Id'))
-    Departure_Time = Column(DateTime)
-    Landing_Time = Column(DateTime)
-    Remaining_Tickets = Column(Integer)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    airline_company_id = Column(Integer, ForeignKey('airline_companies.id'))
+    origin_country_id = Column(Integer, ForeignKey('countries.id'))
+    destination_country_id = Column(Integer, ForeignKey('countries.id'))
+    departure_time = Column(DateTime)
+    landing_time = Column(DateTime)
+    remaining_tickets = Column(Integer)
 
 class Tickets(Base):
     __tablename__ = 'tickets'
 
-    Id = Column(Integer, primary_key=True, autoincrement=True)
-    Flight_Id = Column(Integer, ForeignKey('flights.Id'), nullable=False)
-    Customer_Id = Column(Integer, ForeignKey('customers.Id'), nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    flight_id = Column(Integer, ForeignKey('flights.id'), nullable=False)
+    customer_id = Column(Integer, ForeignKey('customers.id'), nullable=False)
 
-    __table_args__ = (UniqueConstraint('Flight_Id', 'Customer_Id', name='uq_tickets'),)
+    __table_args__ = (UniqueConstraint('flight_id', 'customer_id', name='uq_tickets'),)
 
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
