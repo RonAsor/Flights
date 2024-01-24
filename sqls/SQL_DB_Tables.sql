@@ -2,7 +2,6 @@
 CREATE TABLE Countries (
     Id INT PRIMARY KEY IDENTITY,
     Country_Name VARCHAR(255) UNIQUE,
-	Flag IMAGE
 );
 go
 -- Create User Roles Table
@@ -18,7 +17,6 @@ CREATE TABLE Users (
     Password TEXT,
     Email VARCHAR(255) UNIQUE,
     User_Role INT FOREIGN KEY REFERENCES User_Roles(Id),
-	Thumbnail IMAGE
 );
 go
 -- Create Airline Companies Table
@@ -141,11 +139,11 @@ begin
 select * from Administrators
 select * from Airline_Companies
 select * from Countries
-select * from Customers
 select * from Flights
-select * from Tickets
 select * from User_Roles
 select * from Users
+select * from Customers
+select * from Tickets
 end
 go
 ---test for recent time
@@ -166,3 +164,5 @@ exec prc_get_flights_by_airline_id 3
 exec prc_get_flights_by_parameters 1,1, '2023-05-05'
 exec prc_get_tickets_by_customer 1
 exec prc_get_user_by_username 'ronasor'
+go
+
