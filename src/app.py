@@ -18,3 +18,6 @@ configure_routes(app)
 if __name__ == "__main__":
     log.get_logger().info('Attempting to start the server...')
     app.run(debug=True)
+
+
+##db.createall
