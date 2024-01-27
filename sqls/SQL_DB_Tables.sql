@@ -149,6 +149,10 @@ go
 ---test for recent time
 insert into Flights values (3,1,1,'2024-01-19 00:00:00','2024-01-19 02:00:00',5)
 
+--order of deletions
+delete from Tickets
+delete from Customers
+
 
 insert into Users values ('ronasor','hkjfl','asrron@gmail.com',2,'')
 insert into Countries values ('Israel','')

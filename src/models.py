@@ -42,7 +42,7 @@ class Customers(Base):
     last_name = Column(Text)
     address = Column(Text)
     phone_no = Column(String(255), unique=True)
-    credit_card_mo = Column(String(255), unique=True)
+    credit_card_no = Column(String(255), unique=True)
     user_id = Column(Integer, ForeignKey('users.id'), unique=True)
 
 class Administrators(Base):
