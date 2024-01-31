@@ -2,10 +2,10 @@
 Module used for better organized routing of flask app to endpoints
 '''
 from flask import render_template,jsonify,request,Flask
-from models import Administrators,AirlineCompanies,Countries,Customers,Tickets,UserRoles,Users,Flights  # Import your models
-from database import Session
-from repository import Repository
-
+from src.models import Administrators,AirlineCompanies,Countries,Customers,Tickets,UserRoles,Users,Flights
+from src.database import Session
+from src.repository import Repository
+from sqlalchemy import CursorResult
 
 def configure_routes(app:Flask):
     
@@ -33,8 +33,6 @@ def configure_routes(app:Flask):
         session.close()
         return render_template('airlines.html', airlines=airlines)
     
-    
-#region Area of web display
     @app.route('/test', methods=['GET'])
     def placeholder_displays():
         session = Session()
@@ -43,7 +41,7 @@ def configure_routes(app:Flask):
         data = json_formatter(test)
         session.close()
         return data
-        #working for get_user_by_username('username')
+    
     @app.route('/test1', methods=['GET'])
     def placeholder_displays2():
         session = Session()
@@ -52,18 +50,12 @@ def configure_routes(app:Flask):
         data = json_formatter(test_result)
         session.close()
         return jsonify(data)
-        #working for get_tickets_by_customer(customer_id:int)
     
-    
-    
-    
-   
-
-
+    #consider to re-implement as a function and not as page
     @app.route('/create_customer', methods=['POST'])
     def create_customer():
         try:
-            # Get parameters from the request URL
+            # get data from the form
             first_name = request.form.get('first_name')
             last_name = request.form.get('last_name')
             address = request.form.get('address')
@@ -72,7 +64,7 @@ def configure_routes(app:Flask):
             user_id = request.form.get('user_id')
             app.logger.info(f"Received data: {first_name}, {last_name}, {address}, {phone_no}, {credit_card_no}, {user_id}")
 
-            # Validate the presence of required parameters
+            # validation
             if not all([first_name, last_name, address, phone_no, credit_card_no, user_id]):
                 app.logger.error("Incomplete data provided")
                 return jsonify({"error": "Incomplete data provided"}), 400
@@ -87,7 +79,6 @@ def configure_routes(app:Flask):
                 user_id=user_id
             )
             session_instance = Session()
-            # Add the new customer to the database using the class method
             repo = Repository(session=session_instance)
             result = repo.add(new_customer)
             if result:
@@ -98,23 +89,38 @@ def configure_routes(app:Flask):
             app.logger.error(f"An error occurred: {str(e)}")
             return jsonify({"error": str(e)}), 500
         
+    @app.route('/create_admin', methods=['POST'])
+    def create_admin():
+        try:
+            first_name = request.form.get('first_name')
+            last_name = request.form.get('last_name')
+            user_id = request.form.get('user_id')
+            app.logger.info(f"Received data: {first_name}, {last_name},  {user_id}")
+
+            if not all([first_name, last_name,  user_id]):
+                app.logger.error("Incomplete data provided")
+                return jsonify({"error": "Incomplete data provided"}), 400
+
+            new_admin = Administrators(
+                first_name=first_name,
+                last_name=last_name,
+                user_id=user_id
+            )
+            session_instance = Session()
+            repo = Repository(session=session_instance)
+            repo.add(new_admin)
+        except Exception as e:
+            app.logger.error(f"An error occurred: {str(e)}")
+            return jsonify({"error": str(e)}), 500
         
     @app.route('/delete_customer', methods=['POST'])
     def delete_customer():
         try:
-            # Get parameters from the request URL
             id = request.form.get('id')
-           
-            #app.logger.info(f"Received data: {first_name}, {last_name}, {address}, {phone_no}, {credit_card_no}, {user_id}")
-
-            # Validate the presence of required parameters
             if not id:
                 app.logger.error("Incomplete data provided")
                 return jsonify({"error": "Incomplete data provided"}), 400
-
-            # Logic to create a new customer instance and save it to the database...
             session_instance = Session()
-            # Add the new customer to the database using the class method
             repo = Repository(session=session_instance)
             customer = repo.get_by_id(Customers,id)
             repo.remove(customer)
@@ -122,25 +128,45 @@ def configure_routes(app:Flask):
         except Exception as e:
             app.logger.error(f"An error occurred: {str(e)}")
             return jsonify({"error": str(e)}), 500
-        
-        
+    
+    @app.route('/get_all' ,methods=['POST'])
+    def get_all():
+        session = Session()
+        repo = Repository(session=session)
+        res:list[Administrators]=repo.get_all(Administrators)
+        listofadmin = []
+        for i in res:
+            print(i.first_name)
+            listofadmin.append({"name":i.first_name})
+        return jsonify(listofadmin),200
+    
+    @app.route('/prc_call', methods=['POST'])
+    def prc_test():
+        session = Session()
+        repo = Repository(session=session)
+        admin = repo.get_by_id(Administrators,'9')
+        admin.first_name = 'eli'
+        repo.update(admin)
+        return "",200
+    
+    
+    
     @app.route('/delete', methods=['POST'])
     def delete():
+        #possible placeholder for form delete action
         try:
-            # Get parameters from the request URL
             id = request.form.get('id')
             tablename = request.form.get('tablename')
 
-            # Define the list of table names
+            # define the list of table names
             tablenames = ['administrators', 'airline_companies', 'countries', 'customers', 'tickets', 'user_roles', 'users', 'flights']
 
-            # Check if the provided tablename is valid
+            # check if the provided tablename is valid
             if tablename.lower() not in tablenames:
                 return jsonify({"error": "Invalid tablename"}), 400
 
-            # Import the necessary model dynamically based on the tablename
+            # import the necessary model dynamically based on the tablename
             model = globals()[tablename.capitalize()]
-            # Delete the record from the database
             session = Session()
             repo = Repository(session=session)
             result = repo.remove(model,id)
@@ -151,9 +177,7 @@ def configure_routes(app:Flask):
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
-#endregion
-
-    def json_formatter(cursor):
+    def json_formatter(cursor:CursorResult):
             result = cursor.fetchall()
             columns = cursor.keys()
             data = [dict(zip(columns, row)) for row in result] 

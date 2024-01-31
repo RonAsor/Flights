@@ -136,13 +136,14 @@ go
 
 
 begin
-select * from Administrators
 select * from Airline_Companies
 select * from Countries
 select * from Flights
 select * from User_Roles
-select * from Users
+select * from Administrators
 select * from Customers
+select * from Users
+
 select * from Tickets
 end
 go
@@ -152,14 +153,17 @@ insert into Flights values (3,1,1,'2024-01-19 00:00:00','2024-01-19 02:00:00',5)
 --order of deletions
 delete from Tickets
 delete from Customers
+delete from Administrators
 
 
-insert into Users values ('ronasor','hkjfl','asrron@gmail.com',2,'')
+insert into Administrators values ('eli','israeli',1)
+
+insert into Users values ('aspoidrhap','hkjfl','asrron1@gmail.com',2)
 insert into Countries values ('Israel','')
 insert into Airline_Companies values ('chakair',1,2) --using int as ids
 insert into Customers values ('Ron','Asor','m.h','028502375','5598293','2')
 insert into Flights values (3,1,1,'2023-05-05 00:00:00','2023-08-05 00:00:00',5)
-insert into Tickets values (3,1)
+insert into Tickets values (2,26)
 exec prc_get_airline_by_username 'ronasor'
 exec prc_get_customer_by_username 'ronasor'
 exec prc_get_arrival_flights 1

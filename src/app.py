@@ -1,14 +1,11 @@
 # app.py
 from flask import Flask
-from configparser import ConfigParser
-from tools.logger import SingletonLogger
-from routes import configure_routes
-from database import engine  
+from src.tools.logger import SingletonLogger
+from src.routes import configure_routes
+from src.database import engine  
 
 app = Flask(__name__)
 
-config = ConfigParser()
-config.read('config.cfg')
 
 log = SingletonLogger()
 
