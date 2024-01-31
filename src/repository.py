@@ -10,7 +10,7 @@ class Repository:
         self.logger = SingletonLogger().get_logger()
     
     #region log
-    def log(self,message,state):
+    def log(self, message, state):
         match state:
             case "info":self.logger.info(message)
             case "error":self.logger.error(message)
@@ -26,7 +26,6 @@ class Repository:
 
     #region CRUD
     def get_by_id(self, model, id)-> object:
-        
         try:
             query = self.session.query(model).filter_by(id=id)
             res = query.one_or_none()
@@ -86,7 +85,8 @@ class Repository:
             self.log(f"Remove error on Repository.remove: {e}, crud_operation='DELETE'",'error')
     #endregion    
         
-    #region db_procedures    
+    #region db_procedures
+    #needs uncluttering : execute_procedure, log_and_execute, log    
     def execute_procedure(self, procedure, params=None):
         query = text(f"EXEC {procedure} {', '.join([f'@_{key}=:_{key}' for key in params.keys()])}")
         return self.log_and_execute(procedure, "execute_procedure", query, params, crud_operation="EXECUTE")
@@ -129,29 +129,36 @@ class Repository:
     #region repo-originated db calls
     #needs explicit calling, procedures does not exist
 
-    def get_airlines_by_country(self, country_id:models.Countries.id):
-        query = "EXEC prc_get_airlines_by_country @_country_id=:country_id"
-        return self.execute_procedure(query, {"country_id": country_id})
+    def get_airlines_by_country(self, country_id: models.Countries.id):
+        
+        results:list[models.AirlineCompanies] = self.session.query(models.AirlineCompanies).filter(models.AirlineCompanies.country_id == country_id).all()
+        self.log(f'get_airlines_by_country: {results}','info')
+        return results
 
-    def get_flights_by_origin_country_id(self, country_id:models.Countries.id):
-        query = "EXEC prc_get_flights_by_origin_country @_country_id=:country_id"
-        return self.execute_procedure(query, {"country_id": country_id})
+    def get_flights_by_origin_country_id(self, country_id: models.Countries.id):
+        results:list[models.Flights] = self.session.query(models.Flights).filter(models.Countries.id == country_id)
+        self.log(f'get_flights_by_origin_country_id {results}','info')
+        return results
 
-    def get_flights_by_destination_country_id(self, country_id:models.Countries.id):
-        query = "EXEC prc_get_flights_by_destination_country @_country_id=:country_id"
-        return self.execute_procedure(query, {"country_id": country_id})
+    def get_flights_by_destination_country_id(self, country_id: models.Countries.id):
+        results:list[models.Flights] = self.session.query(models.Flights).filter(models.Flights.destination_country_id == country_id)
+        self.log(f'get_flights_by_destination_country_id {results}','info')
+        return results
 
-    def get_flights_by_departure_date(self, date:datetime.date):
-        query = "EXEC prc_get_flights_by_departure_date @_date=:date"
-        return self.execute_procedure(query, {"date": date})
+    def get_flights_by_departure_date(self, date: datetime.date):
+        results:list[models.Flights] = self.session.query(models.Flights).filter(models.Flights.departure_time == date)
+        self.log('get_flights_by_departure_date','info')
+        return results
 
-    def get_flights_by_landing_date(self, date:datetime.date):
-        query = "EXEC prc_get_flights_by_landing_date @_date=:date"
-        return self.execute_procedure(query, {"date": date})
+    def get_flights_by_landing_date(self, date: datetime.date):
+        results:list[models.Flights] = self.session.query(models.Flights).filter(models.Flights.landing_time == date)
+        self.log(f'get_flights_by_landing_date {results}','info')
+        return results
 
-    def get_flights_by_customer(self, customer:models.Customers.id):
-        query = "EXEC prc_get_flights_by_customer @_customer_id=:customer_id"
-        return self.execute_procedure(query, {"customer_id": customer})
+    def get_flights_by_customer(self, customer: models.Customers):
+        results:list[models.Flights] = self.session.query(models.Flights).filter(models.Customers.id == customer.id)
+        self.log(f'get_flights_by_customer {results}','info')
+        return results
 
     #endregion
     #endregion

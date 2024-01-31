@@ -3,8 +3,9 @@ from src.database import Session
 from src.repository import Repository
 from src.models import *
 from src.tokens import Token
+from src.facades.anonymous_facade import AnonymousFacade
 
-class AdministratorFacade(FacadesBase):
+class AdministratorFacade(AnonymousFacade):
     
     def __init__(self,token: Token):
         super().__init__(token)
