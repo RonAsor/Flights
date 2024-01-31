@@ -1,4 +1,3 @@
-from src.facades.facades_base import FacadesBase
 from src.database import Session
 from src.repository import Repository
 from src.models import *
@@ -39,14 +38,20 @@ class AirlineFacade(AnonymousFacade):
     
     def add_flight(self,flight: Flights):
         repo = Repository(session=Session())
-        repo.add(flight)
+        if flight.remaining_tickets > 0 and flight.landing_time>flight.departure_time and flight.origin_country_id != flight.destination_country_id:
+            repo.add(flight)
         repo.session.close()
         
     #check what update does here too        
-    def update_flight(self,flight: Flights):
-        pass
-    
-    def remove_flight(self,flight: Flights):
+    def update_flight(self,flight: Flights,**kwargs):
         repo = Repository(session=Session())
-        repo.remove(Flights,flight.id)
+        res: Flights = repo.get_by_id(Flights,flight.airline_company_id)
+        if self.token.id == res.airline_company_id
+            repo.update(flight)
+            repo.session.close()
+
+        
+    def remove_flight(self,flight: Flights.id):
+        repo = Repository(session=Session())
+        repo.remove(Flights,flight)
         repo.session.close()

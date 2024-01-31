@@ -1,4 +1,3 @@
-from src.facades.facades_base import FacadesBase
 from src.database import Session
 from src.repository import Repository
 from src.models import *

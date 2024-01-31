@@ -6,6 +6,8 @@ from src.models import Administrators,AirlineCompanies,Countries,Customers,Ticke
 from src.database import Session
 from src.repository import Repository
 from sqlalchemy import CursorResult
+from src.facades.anonymous_facade import AnonymousFacade
+
 
 def configure_routes(app:Flask):
     
@@ -144,12 +146,10 @@ def configure_routes(app:Flask):
     def prc_test():
         session = Session()
         repo = Repository(session=session)
-        admin = repo.get_by_id(Administrators,'9')
+        admin: Administrators = repo.get_by_id(Administrators,9)
         admin.first_name = 'eli'
         repo.update(admin)
         return "",200
-    
-    
     
     @app.route('/delete', methods=['POST'])
     def delete():
@@ -182,8 +182,26 @@ def configure_routes(app:Flask):
             columns = cursor.keys()
             data = [dict(zip(columns, row)) for row in result] 
             return data
-            
-        
-
+    @app.route('/admin_login', methods=['GET'])
+    def ulogin_test():
+        id = request.args.get('id')
+        new_date=request.args.get('new_date')
+        new_date2=request.args.get('new_date2')
+        user_name=request.args.get('username')
+        password=request.args.get('password')
+        anon = AnonymousFacade()
+        try:
+            facade = anon.login(user_name,password)
+            if facade is not None:
+                flights = facade.get_flights_by_id(int(id))      
+                if len(flights)>0:
+                    flight:Flights = flights[0]
+                    if new_date:
+                        flight.departure_time = new_date
+                    if new_date2:
+                        flight.landing_time = new_date2
+                    facade.update_flight(flight)
+        except:
+            pass
     if __name__ == '__main__':
         app.run(debug=True)

@@ -14,8 +14,8 @@ class Role(Enum):
     CUSTOMER = 3
 class AnonymousFacade(FacadesBase):
     
-    def __init__(self,token: Token):
-        super().__init__(token)
+    def __init__(self):
+        super().__init__()
         
     def login(self, username: Users.username, password: Users.password):
         try:
@@ -38,3 +38,10 @@ class AnonymousFacade(FacadesBase):
             
         except Exception as e:
             repo.log(f'error of {e} encountered')
+    
+    def add_customer(self,first_name: str, last_name: str, address: str, phone_no: str, credit_card_no: str, user_id: int):
+        repo = Repository(session=Session())
+        if user_id == self.token.id:
+            repo.add(Customers(first_name=first_name, last_name=last_name, address=address, phone_no=phone_no, credit_card_no=credit_card_no, user_id=user_id))
+        else:
+            raise ValueError('Unauthorized access of user')

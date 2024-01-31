@@ -136,8 +136,8 @@ go
 
 
 begin
-select * from Airline_Companies
 select * from Countries
+select * from Airline_Companies
 select * from Flights
 select * from User_Roles
 select * from Administrators
