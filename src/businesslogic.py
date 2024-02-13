@@ -1,2 +1,0 @@
-class BusinessLogic():
-    pass

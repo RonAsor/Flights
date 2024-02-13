@@ -5,30 +5,27 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User list</title>
+    <title>Airlines</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
 </head>
 <body>
-    <h1>User list</h1>
+    <h1>Airlines</h1>
     <table>
         <thead>
             <tr>
                 <th>ID</th>
-                <th>username</th>
-                <th>password</th>
-                <th>email</th>
-                <th>user_role</th>
+                <th>Airline Name</th>
+                <th>Airline Country Code</th>
+                <th>Airline By User ID</th>
             </tr>
         </thead>
         <tbody>
-            {% for user in users %}
+            {% for airline in airlines %}
             <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.password }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.user_role }}</td>
+                <td>{{ airline.id }}</td>
+                <td>{{ airline.airline_name }}</td>
+                <td>{{ airline.country_id }}</td>
+                <td>{{ airline.user_id }}</td>
             </tr>
             {% endfor %}
         </tbody>

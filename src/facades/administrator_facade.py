@@ -1,13 +1,14 @@
 from src.database import Session
 from src.repository import Repository
 from src.models import *
-from src.tokens import Token
-from src.facades.anonymous_facade import AnonymousFacade
+from src.facades.tokens import LoginToken
+from src.facades.anonymous_facade import FacadesBase
 
-class AdministratorFacade(AnonymousFacade):
+class AdministratorFacade(FacadesBase):
     
-    def __init__(self,token: Token):
-        super().__init__(token)
+    def __init__(self,token: LoginToken):
+        super().__init__()
+        self.token = token
         pass
     
     def get_all_customers(self):

@@ -7,7 +7,10 @@ from src.database import Session
 from src.repository import Repository
 from sqlalchemy import CursorResult
 from src.facades.anonymous_facade import AnonymousFacade
-
+from src.facades.tokens import LoginToken
+from src.facades.administrator_facade import AdministratorFacade
+from src.facades.customer_facade import CustomerFacade
+from src.facades.airline_facade import AirlineFacade
 
 def configure_routes(app:Flask):
     
@@ -18,6 +21,22 @@ def configure_routes(app:Flask):
         users = repo.get_all(Users)
         session.close()
         return render_template('users.html',users=users)
+    
+    @app.route('/facade_test',methods = ['GET'])
+    def facade_test():
+        flightuser:AirlineFacade|AdministratorFacade|CustomerFacade = AnonymousFacade().login('ronasor','hkjfl')
+        #add get airline id by user_id
+        flight = Flights(
+            airline_company_id = 3,
+            origin_country_id = 1,
+            destination_country_id=1,
+            departure_time = "2023-06-05 00:00:00.000",
+            landing_time= "2023-08-05 00:00:00.000",
+            remaining_tickets=5
+            )
+        print(flight)
+        Repository(session=Session()).add(flight)
+        return 'ok'
     
     @app.route('/user_roles', methods=['GET'])
     def roles():

@@ -143,7 +143,6 @@ select * from User_Roles
 select * from Administrators
 select * from Customers
 select * from Users
-
 select * from Tickets
 end
 go

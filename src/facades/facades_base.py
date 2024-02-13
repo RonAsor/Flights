@@ -3,11 +3,8 @@ from src.models import *
 from src.repository import Repository
 from flask import request
 from src.database import Session
-from src.tokens import Token
 
 class FacadesBase():
-    def __init__(self,token:Token):
-        self.token = token
         
     def get_all_flights(self):
         session = Session()

@@ -1,14 +1,15 @@
 from src.database import Session
 from src.repository import Repository
 from src.models import *
-from src.tokens import Token
-from src.facades.anonymous_facade import AnonymousFacade
-class AirlineFacade(AnonymousFacade):
+from src.facades.tokens import LoginToken
+from src.facades.anonymous_facade import FacadesBase
+class AirlineFacade(FacadesBase):
     pass
     
     
-    def __init__(self,token: Token):
-        super().__init__(token)
+    def __init__(self,token: LoginToken):
+        super().__init__()
+        self.token = token
     
     def get_my_flights(self):
         repo = Repository(session=Session())
@@ -46,7 +47,7 @@ class AirlineFacade(AnonymousFacade):
     def update_flight(self,flight: Flights,**kwargs):
         repo = Repository(session=Session())
         res: Flights = repo.get_by_id(Flights,flight.airline_company_id)
-        if self.token.id == res.airline_company_id
+        if self.token.id == res.airline_company_id:
             repo.update(flight)
             repo.session.close()
 
