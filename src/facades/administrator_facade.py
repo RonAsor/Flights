@@ -1,8 +1,8 @@
-from src.database import Session
-from src.repository import Repository
-from src.models import *
-from src.facades.tokens import LoginToken
-from src.facades.anonymous_facade import FacadesBase
+from database import Session
+from repository import Repository
+from models import *
+from facades.tokens import LoginToken
+from facades.anonymous_facade import FacadesBase
 
 class AdministratorFacade(FacadesBase):
     

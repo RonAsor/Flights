@@ -1,8 +1,8 @@
 # app.py
 from flask import Flask
-from src.tools.logger import SingletonLogger
-from src.routes import configure_routes
-from src.database import engine  
+from tools.logger import SingletonLogger
+from routes import configure_routes
+from database import engine  
 
 app = Flask(__name__)
 

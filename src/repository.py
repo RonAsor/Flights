@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from src import models
+import models
 from datetime import datetime
-from src.tools.logger import SingletonLogger
+from tools.logger import SingletonLogger
 
 class Repository:
     def __init__(self, session: Session):
@@ -10,12 +10,12 @@ class Repository:
         self.logger = SingletonLogger().get_logger()
     
     #region log
-    def log(self, message, state):
+    def log(self, message:str, state:str):
         match state:
             case "info":self.logger.info(message)
             case "error":self.logger.error(message)
     
-    def log_and_execute(self, message, operation, query, params=None, crud_operation=None):
+    def log_and_execute(self, message:str, operation:str, query:str, params=None, crud_operation=None):
         try:
             self.log(f"{crud_operation} - Executing {operation} - {message}",'info')
             result = self.session.execute(query, params)
@@ -126,7 +126,7 @@ class Repository:
         return self.log_and_execute("Get tickets by customer", "get_tickets_by_customer", query, {"customer_id": customer_id})
 
     #region repo-originated db calls
-    #needs explicit calling, procedures does not exist
+    #needs explicit calling, procedures does not exist on the database but handled by the source
 
     def get_airlines_by_country(self, country_id: models.Countries.id):
         

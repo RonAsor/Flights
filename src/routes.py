@@ -2,15 +2,15 @@
 Module used for better organized routing of flask app to endpoints
 '''
 from flask import render_template,jsonify,request,Flask
-from src.models import Administrators,AirlineCompanies,Countries,Customers,Tickets,UserRoles,Users,Flights
-from src.database import Session
-from src.repository import Repository
+from models import Administrators,AirlineCompanies,Countries,Customers,Tickets,UserRoles,Users,Flights
+from database import Session
+from repository import Repository
 from sqlalchemy import CursorResult
-from src.facades.anonymous_facade import AnonymousFacade
-from src.facades.tokens import LoginToken
-from src.facades.administrator_facade import AdministratorFacade
-from src.facades.customer_facade import CustomerFacade
-from src.facades.airline_facade import AirlineFacade
+from facades.anonymous_facade import AnonymousFacade
+from facades.tokens import LoginToken
+from facades.administrator_facade import AdministratorFacade
+from facades.customer_facade import CustomerFacade
+from facades.airline_facade import AirlineFacade
 
 def configure_routes(app:Flask):
     
@@ -23,6 +23,7 @@ def configure_routes(app:Flask):
         return render_template('users.html',users=users)
     
     @app.route('/facade_test',methods = ['GET'])
+    #test for logging in to a certain facade of certain user, and attempting to create a flight from that user
     def facade_test():
         flightuser:AirlineFacade|AdministratorFacade|CustomerFacade = AnonymousFacade().login('ronasor','hkjfl')
         #add get airline id by user_id
@@ -35,9 +36,21 @@ def configure_routes(app:Flask):
             remaining_tickets=5
             )
         print(flight)
-        Repository(session=Session()).add(flight)
+        if isinstance(flightuser,AirlineFacade):
+            print('airline facade')
+            AirlineFacade.add_flight(flightuser,flight)
+        elif isinstance(flightuser,AdministratorFacade):
+            AdministratorFacade.add_administrator(flightuser,flight)
+            print('admin facade')
+            
+        elif isinstance(flightuser,CustomerFacade):
+            CustomerFacade.add_ticket(flightuser,flight)
+            print('customer facade')
+            
         return 'ok'
     
+    
+    #gets roles from the database, test presentation only
     @app.route('/user_roles', methods=['GET'])
     def roles():
         session = Session()
@@ -46,6 +59,7 @@ def configure_routes(app:Flask):
         session.close()
         return render_template('user_roles.html', user_roles=user_roles)
     
+    #shows all airlines
     @app.route('/airlines', methods=['GET'])
     def airlines():
         session = Session()
@@ -202,7 +216,7 @@ def configure_routes(app:Flask):
             data = [dict(zip(columns, row)) for row in result] 
             return data
     @app.route('/admin_login', methods=['GET'])
-    def ulogin_test():
+    def login_test():
         id = request.args.get('id')
         new_date=request.args.get('new_date')
         new_date2=request.args.get('new_date2')

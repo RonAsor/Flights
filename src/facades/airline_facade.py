@@ -1,8 +1,8 @@
-from src.database import Session
-from src.repository import Repository
-from src.models import *
-from src.facades.tokens import LoginToken
-from src.facades.anonymous_facade import FacadesBase
+from database import Session
+from repository import Repository
+from models import *
+from facades.tokens import LoginToken
+from facades.anonymous_facade import FacadesBase
 class AirlineFacade(FacadesBase):
     pass
     
@@ -18,15 +18,15 @@ class AirlineFacade(FacadesBase):
         if len(airlines) == 1:
             return tickets
         
-        repo.log(f'error: found {len(airlines)} instead of 1')
+        repo.log(f'error: found {len(airlines)} instead of 1','error')
         
     def add_airline(self,airline: AirlineCompanies):
         repo = Repository(session=Session())
         repo.add(airline)
-        repo.log(f'Success adding airline {airline}')
+        repo.log(f'Success adding airline {airline}','info')
     
     
-    #check what the update methods do
+    #check what the update methods do, should update the existing values with values changed by the user and COMMIT them at the end. currently unsupported
     def update_airline(self,airline: AirlineCompanies):
         repo = Repository(session=Session())
         airlines:list[AirlineCompanies] = repo.get_all(AirlineCompanies,{"user_id":self.token.id})
@@ -37,13 +37,14 @@ class AirlineFacade(FacadesBase):
         
         repo.log(f'error: found {len(airlines)} instead of 1')
     
+    #adds a flight to the database, working, should check criterias for the IF statement
     def add_flight(self,flight: Flights):
         repo = Repository(session=Session())
-        if flight.remaining_tickets > 0 and flight.landing_time>flight.departure_time and flight.origin_country_id != flight.destination_country_id:
+        if flight.remaining_tickets > 0 and flight.landing_time>flight.departure_time: #and flight.origin_country_id != flight.destination_country_id:
             repo.add(flight)
         repo.session.close()
         
-    #check what update does here too        
+    #check what update does here too, gets flight information and updates it with session.commit from repo.update        
     def update_flight(self,flight: Flights,**kwargs):
         repo = Repository(session=Session())
         res: Flights = repo.get_by_id(Flights,flight.airline_company_id)

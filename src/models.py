@@ -1,7 +1,7 @@
 # models.py
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
-from src.database import engine
+from database import engine
 
 Base = declarative_base()
 

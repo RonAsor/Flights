@@ -1,8 +1,8 @@
 from datetime import date
-from src.models import *
-from src.repository import Repository
+from models import *
+from repository import Repository
 from flask import request
-from src.database import Session
+from database import Session
 
 class FacadesBase():
         

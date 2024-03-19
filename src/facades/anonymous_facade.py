@@ -1,11 +1,11 @@
-from src.facades.facades_base import FacadesBase
-from src.database import Session
-from src.repository import Repository
-from src.models import *
-from src.facades.tokens import LoginToken
-from src.facades.administrator_facade import AdministratorFacade
-from src.facades.customer_facade import CustomerFacade
-from src.facades.airline_facade import AirlineFacade
+from facades.facades_base import FacadesBase
+from database import Session
+from repository import Repository
+from models import *
+from facades.tokens import LoginToken
+from facades.administrator_facade import AdministratorFacade
+from facades.customer_facade import CustomerFacade
+from facades.airline_facade import AirlineFacade
 
 class Role():
     ADMINISTRATORS = 1
@@ -18,6 +18,7 @@ class AnonymousFacade(FacadesBase):
         super().__init__()
         
     def login(self, username: Users.username, password: Users.password)-> AdministratorFacade | AirlineCompanies | CustomerFacade:
+        """login function that creates the token of the corresponding Facade, returns self.user which is a initialized object of the correct facade"""
         try:
             repo = Repository(session=Session())
             user:Users = repo.get_user_by_username(username=username).one()
@@ -35,10 +36,12 @@ class AnonymousFacade(FacadesBase):
                         self.user = CustomerFacade(token=LoginToken(id=user.id,name=user.username,role=user.user_role))
                         return self.user
                     case _: 
+                        #default case, in a scenario where role is none of the above, perhaps raise is a bad option here?
                         raise ValueError('Unknown user role')
                     
                     
             elif user.password != password:
+                #placeholder in case the password for the user is incorrect, may use the returned value to do certain things (re-render the page/error message etc.)
                 self.user = None
                 return None
             
