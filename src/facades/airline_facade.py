@@ -9,6 +9,7 @@ class AirlineFacade(FacadesBase):
     
     def __init__(self,token: LoginToken):
         super().__init__()
+        self.role = 'Airline'
         self.token = token
     
     def get_my_flights(self):
@@ -33,16 +34,24 @@ class AirlineFacade(FacadesBase):
         #tickets:list[Tickets] = repo.get_all(Tickets,{"user_id":airlines[0].id})
         tickets = ''
         if len(airlines) == 1:
+            repo.session.close()
             return tickets
         
         repo.log(f'error: found {len(airlines)} instead of 1')
+        repo.session.close()
+        
+        
     
     #adds a flight to the database, working, should check criterias for the IF statement
     def add_flight(self,flight: Flights):
         repo = Repository(session=Session())
         if flight.remaining_tickets > 0 and flight.landing_time>flight.departure_time: #and flight.origin_country_id != flight.destination_country_id:
             repo.add(flight)
-        repo.session.close()
+            repo.session.close()
+            
+        elif flight.remaining_tickets <=0:
+            repo.session.close()
+            return 'Not enough tickets for selected flight'
         
     #check what update does here too, gets flight information and updates it with session.commit from repo.update        
     def update_flight(self,flight: Flights,**kwargs):

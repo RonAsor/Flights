@@ -17,11 +17,11 @@ class Repository:
     
     def log_and_execute(self, message:str, operation:str, query:str, params=None, crud_operation=None):
         try:
-            self.log(f"{crud_operation} - Executing {operation} - {message}",'info')
+            self.log(f"{crud_operation} - Executing {operation} - {message}",state='info')
             result = self.session.execute(query, params)
             return result
         except Exception as e:
-            self.log(f"Error during {operation} - {message}: {str(e)}",'error')
+            self.log(f"Error during {operation} - {message}: {str(e)}",state='error')
     #endregion    
 
     #region CRUD

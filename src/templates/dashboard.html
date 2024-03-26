@@ -1,0 +1,132 @@
+<!-- dashboard.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <h2>Dashboard</h2>
+    <p>Welcome {{ user.role }}!</p>
+
+    <!-- Dropdown button -->
+    <div class="dropdown">
+        <!-- class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown"
+            aria-expanded="false" -->
+
+        {% if user.role == 'Administrator' %}
+        <select name="" id="" onchange="selectOption(this.value)">
+            <option>Action</option>
+            <option value="1">Show all customers</option>
+            <option value="2">Add airline</option>
+            <option value="3">Add customer</option>
+            <option value="4">Add administrator</option>
+            <option value="5">Remove airline</option>
+            <option value="6">Remove customer</option>
+            <option value="7">Remove administrator</option>
+        </select>
+        {%endif%}
+
+        {% if user.role == 'Airline' %}
+        <select name="" id="" onchange="selectOption(this.value)">
+            <option>Action</option>
+            <option value="1">Add airline</option> <!-- should this be registration form? -->
+            <option value="2">Show my flights</option>
+            <option value="3">Update airline entry</option>
+            <option value="4">Add flight</option>
+            <option value="5">Update flight entry</option>
+            <option value="6">Remove flight</option>
+        </select>
+        {%endif%}
+        {% if user.role == 'Customer' %}
+        <select name="" id="" onchange="selectOption(this.value)">
+            <option>Action</option>
+            <option value="1">Update customer data</option>
+            <option value="2">Vouch for tickets</option>
+            <option value="3">Cancel ticket vouchers</option>
+            <option value="4">Show my tickets</option>
+        </select>
+        {%endif%}
+
+        <!-- not including the additional facade_base functions -->
+
+        <!--        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        {% if user.role == 'Administrator' %}
+        <li><a class="dropdown-item" href="#">Manage Flights</a></li>
+        <li><a class="dropdown-item" href="#">Manage Airlines</a></li>
+       
+        {% elif user.role == 'Airline' %}
+        <li><a class="dropdown-item" href="#">View My Flights</a></li>
+        
+        {% elif user.role == 'Customer' %}
+        <li><a class="dropdown-item" href="#">Book a Flight</a></li>
+        
+        {% endif %}
+        </ul> -->
+    </div>
+
+    <!-- Include Bootstrap JavaScript and jQuery -->
+    <!--     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script> -->
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+
+
+    <script>
+
+        function selectOption(option) {
+            //  var selectedOption = document.getElementById//("mySelect").value;
+
+            //Administrator actions
+            if (option) {
+                switch (option) {
+                    case "1":
+                        console.log(AdministratorFacade.get_all_customers());
+                        console.log("Show all customers");
+                        break;
+                    case "2":
+                        console.log("Add airline")
+                        console.log(2);
+                        break;
+                    case "3":
+                        console.log("Add customer");
+                        break;
+                    case "4":
+                        console.log("Add administrator");
+                        break;
+                    case "5":
+                        console.log("Remove airline");
+                        break;
+                    case "6":
+                        console.log("Remove customer");
+                        break;
+                    case "7":
+                        console.log("Remove administrator");
+                        break;
+
+                    //Customer actions
+
+                    case "8":
+                        console.log("");
+                    case "9":
+                    case "10":
+                    case "11":
+                    case "12":
+                    case "13":
+                    case "14":
+
+                }
+
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>

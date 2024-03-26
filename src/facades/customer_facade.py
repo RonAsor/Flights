@@ -9,6 +9,7 @@ class CustomerFacade(FacadesBase):
     def __init__(self,token: LoginToken):
         super().__init__()
         self.token = token
+        self.role = 'Customer'
         
     
     def update_customer(self,customer:Customers):

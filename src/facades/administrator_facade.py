@@ -8,6 +8,7 @@ class AdministratorFacade(FacadesBase):
     
     def __init__(self,token: LoginToken):
         super().__init__()
+        self.role = 'Administrator'
         self.token = token
         pass
     

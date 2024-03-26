@@ -46,7 +46,7 @@ class AnonymousFacade(FacadesBase):
                 return None
             
         except Exception as e:
-            repo.log(f'error of {e} encountered')
+            repo.log(f'error encountered '+str(e),state='error')
     
     def add_customer(self,first_name: str, last_name: str, address: str, phone_no: str, credit_card_no: str, user_id: int):
         repo = Repository(session=Session())

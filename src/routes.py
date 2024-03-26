@@ -1,16 +1,18 @@
 '''
 Module used for better organized routing of flask app to endpoints
 '''
-from flask import render_template,jsonify,request,Flask
+from flask import render_template,jsonify,request,Flask,redirect,url_for
 from models import Administrators,AirlineCompanies,Countries,Customers,Tickets,UserRoles,Users,Flights
 from database import Session
 from repository import Repository
 from sqlalchemy import CursorResult
-from facades.anonymous_facade import AnonymousFacade
+from facades.anonymous_facade import AnonymousFacade, UserRoles
 from facades.tokens import LoginToken
 from facades.administrator_facade import AdministratorFacade
 from facades.customer_facade import CustomerFacade
 from facades.airline_facade import AirlineFacade
+
+facade = AnonymousFacade()
 
 def configure_routes(app:Flask):
     
@@ -22,6 +24,30 @@ def configure_routes(app:Flask):
         session.close()
         return render_template('users.html',users=users)
     
+    
+    @app.route('/',methods = ['GET'])
+    def index():
+        
+        return render_template('index.html')
+    
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+            user = AnonymousFacade.login(facade,username, password)
+            if user:
+                return redirect(url_for('dashboard'))
+            else:
+                return render_template('login.html', error='Invalid credentials')
+        return render_template('login.html')
+
+    @app.route('/dashboard')
+    def dashboard():
+        print(facade.user)
+        if not facade.user:
+            return redirect(url_for('login'))
+        return render_template('dashboard.html', user=facade.user)
     @app.route('/facade_test',methods = ['GET'])
     #test for logging in to a certain facade of certain user, and attempting to create a flight from that user
     def facade_test():
@@ -66,7 +92,7 @@ def configure_routes(app:Flask):
         repo = Repository(session)
         airlines = repo.get_all(AirlineCompanies)
         session.close()
-        return render_template('airlines.html', airlines=airlines)
+        return render_template('index.html', airlines=airlines, allairlines=True)
     
     @app.route('/test', methods=['GET'])
     def placeholder_displays():
