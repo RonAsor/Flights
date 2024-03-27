@@ -14,7 +14,7 @@
 
 <body>
     <h2>Dashboard</h2>
-    <p>Welcome {{ user.role }}!</p>
+    <p>Welcome {{username}} {{ user.role }}!</p>
 
     <!-- Dropdown button -->
     <div class="dropdown">
@@ -22,7 +22,7 @@
             aria-expanded="false" -->
 
         {% if user.role == 'Administrator' %}
-        <select name="" id="" onchange="selectOption(this.value)">
+        <select name="action" id="actionSelect" onchange="selectOption(this.value)">
             <option>Action</option>
             <option value="1">Show all customers</option>
             <option value="2">Add airline</option>
@@ -37,57 +37,38 @@
         {% if user.role == 'Airline' %}
         <select name="" id="" onchange="selectOption(this.value)">
             <option>Action</option>
-            <option value="1">Add airline</option> <!-- should this be registration form? -->
-            <option value="2">Show my flights</option>
-            <option value="3">Update airline entry</option>
-            <option value="4">Add flight</option>
-            <option value="5">Update flight entry</option>
-            <option value="6">Remove flight</option>
+            <option value="8">Add airline</option> <!-- should this be registration form? -->
+            <option value="9">Show my flights</option>
+            <option value="10">Update airline entry</option>
+            <option value="11">Add flight</option>
+            <option value="12">Update flight entry</option>
+            <option value="13">Remove flight</option>
         </select>
         {%endif%}
         {% if user.role == 'Customer' %}
         <select name="" id="" onchange="selectOption(this.value)">
             <option>Action</option>
-            <option value="1">Update customer data</option>
-            <option value="2">Vouch for tickets</option>
-            <option value="3">Cancel ticket vouchers</option>
-            <option value="4">Show my tickets</option>
+            <option value="14">Update customer data</option>
+            <option value="15">Vouch for tickets</option>
+            <option value="16">Cancel ticket vouchers</option>
+            <option value="17">Show my tickets</option>
         </select>
         {%endif%}
-
-        <!-- not including the additional facade_base functions -->
-
-        <!--        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        {% if user.role == 'Administrator' %}
-        <li><a class="dropdown-item" href="#">Manage Flights</a></li>
-        <li><a class="dropdown-item" href="#">Manage Airlines</a></li>
-       
-        {% elif user.role == 'Airline' %}
-        <li><a class="dropdown-item" href="#">View My Flights</a></li>
-        
-        {% elif user.role == 'Customer' %}
-        <li><a class="dropdown-item" href="#">Book a Flight</a></li>
-        
-        {% endif %}
-        </ul> -->
     </div>
-
-    <!-- Include Bootstrap JavaScript and jQuery -->
-    <!--     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script> -->
-    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
-
 
     <script>
 
         function selectOption(option) {
-            //  var selectedOption = document.getElementById//("mySelect").value;
 
             //Administrator actions
             if (option) {
                 switch (option) {
                     case "1":
-                        console.log(AdministratorFacade.get_all_customers());
                         console.log("Show all customers");
+                        var selectedOption = document.getElementById("actionSelect").value;
+                        if (selectedOption) {
+                            window.location.href = "{{ url_for('show_all_customers') }}";
+                        }
                         break;
                     case "2":
                         console.log("Add airline")
@@ -109,16 +90,48 @@
                         console.log("Remove administrator");
                         break;
 
-                    //Customer actions
+                    //Airline actions
 
                     case "8":
-                        console.log("");
+                        console.log("Add Airline");
+                        break;
                     case "9":
+                        console.log("Show my flights");
+                        break;
+
                     case "10":
+                        console.log("Update airline entry");
+                        break;
                     case "11":
+                        console.log("Add flight");
+                        break;
+
                     case "12":
+                        console.log("Update flight entry");
+                        break;
+
                     case "13":
+                        console.log("Remove flight");
+                        break;
+
+                    //Customer actions
+
                     case "14":
+                        console.log("Update customer data");
+                        break;
+
+                    case "15":
+                        console.log("Vouch for tickets");
+                        break;
+
+                    case "16":
+                        console.log("Cancel ticket vouchers");
+                        break;
+
+                    case "17":
+                        console.log("Show my tickets");
+                        break;
+
 
                 }
 

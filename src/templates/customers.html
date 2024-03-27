@@ -1,0 +1,44 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer list</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+    <h1>Customer list</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>first name:</th>
+                <th>last name:</th>
+                <th>address:</th>
+                <th>phone number:</th>
+                <th>credit card number:</th>
+                <th>user id:</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.id }}</td>
+                <td>{{ customer.first_name }}</td>
+                <td>{{ customer.last_name }}</td>
+                <td>{{ customer.addresss }}</td>
+                <td>{{ customer.phone_no }}</td>
+                <td>{{ customer.credit_card_no }}</td>
+                <td>{{ customer.user_id }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>

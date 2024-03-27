@@ -157,7 +157,7 @@ delete from Administrators
 
 insert into Administrators values ('eli','israeli',1)
 
-insert into Users values ('aspoidrhap','hkjfl','asrron1@gmail.com',2)
+insert into Users values ('pom','pom','jkl@gmail.com',1)
 insert into Countries values ('Israel','')
 insert into Airline_Companies values ('chakair',1,2) --using int as ids
 insert into Customers values ('Ron','Asor','m.h','028502375','5598293','2')

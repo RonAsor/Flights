@@ -1,0 +1,40 @@
+<!-- re.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create user</title>
+</head>
+
+<body>
+    <h2>Create user</h2>
+    {% if error %}
+    <p>{{ error }}</p>
+    {% endif %}
+    <form action="/create_customer" method="POST">
+
+        <label for="first_name">First Name:</label><br>
+        <input type="text" required id="first_name" name="first_name"><br>
+        <label for="last_name">Last Name:</label><br>
+        <input type="text" id="last_name" name="last_name"><br>
+        <label for="address">Address:</label><br>
+        <input type="text" id="address" name="address"><br>
+        <label for="phone_no">Phone Number:</label><br>
+        <input type="text" id="phone_no" name="phone_no"><br>
+        <label for="credit_card_no">Credit Card Number:</label><br>
+        <input type="text" id="credit_card_no" name="credit_card_no"><br>
+        <label for="username">Username:</label><br>
+        <input type="text" required id="username" name="username"><br>
+        <label for="password">Password:</label><br>
+        <input type="text" required id="password" name="password"><br>
+        <label for="email">Email:</label><br>
+        <input type="text" required id="email" name="email"><br><br>
+        <input type="submit" value="Register">
+    </form>
+    <button><a style="color:black; text-decoration: none;" href="{{ url_for('login') }}">Return to login</a></button>
+</body>
+
+</html>

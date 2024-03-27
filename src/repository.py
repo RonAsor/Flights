@@ -111,7 +111,9 @@ class Repository:
 
     def get_arrival_flights(self, country_id: models.Countries.id):
         query = "EXEC prc_get_arrival_flights @_country_id=:country_id"
-        return self.log_and_execute("Get arrival flights", "get_arrival_flights", query, {"country_id": country_id})
+        self.log_and_execute("Get arrival flights", "get_arrival_flights", query, {"country_id": country_id})
+        
+        return 
 
     def get_departure_flights(self, country_id: models.Countries.id):
         query = "EXEC prc_get_departure_flights @_country_id=:country_id"
