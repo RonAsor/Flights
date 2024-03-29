@@ -146,6 +146,7 @@ select * from Users
 select * from Tickets
 end
 go
+
 ---test for recent time
 insert into Flights values (3,1,1,'2024-01-19 00:00:00','2024-01-19 02:00:00',5)
 
@@ -153,9 +154,10 @@ insert into Flights values (3,1,1,'2024-01-19 00:00:00','2024-01-19 02:00:00',5)
 delete from Tickets
 delete from Customers
 delete from Administrators
+delete from Users
 
 
-insert into Administrators values ('eli','israeli',1)
+insert into Administrators values ('eli','israeli',5)
 
 insert into Users values ('pom','pom','jkl@gmail.com',1)
 insert into Countries values ('Israel','')

@@ -6,7 +6,7 @@ from models import Administrators,AirlineCompanies,Countries,Customers,Tickets,U
 from database import Session
 from repository import Repository
 from sqlalchemy import CursorResult
-from facades.anonymous_facade import AnonymousFacade, UserRoles
+from facades.anonymous_facade import AnonymousFacade, Role
 from facades.tokens import LoginToken
 from facades.administrator_facade import AdministratorFacade
 from facades.customer_facade import CustomerFacade
@@ -18,28 +18,28 @@ def configure_routes(app:Flask):
     
     @app.route('/users', methods=['GET'])
     def get_all_test():
-        session = Session()
-        repo = Repository(session)
-        users = repo.get_all(Users)
-        session.close()
-        return render_template('users.html',users=users)
+        if isinstance(facade.user,AdministratorFacade):
+            session = Session()
+            repo = Repository(session)
+            users = repo.get_all(Users)
+            session.close()
+            return render_template('users.html',users=users)
+        return 'invalid'
     
     @app.route('/show_all_customers' ,methods=['GET'])
     def show_all_customers():
         if isinstance(facade.user,AdministratorFacade):
             customerlist = facade.user.get_all_customers()
-            for customer in customerlist:
-                print(customer)    
             return render_template('customers.html',customers=customerlist)
         
         return 'invalid'
 
-    
+    #index '/' page reroutes to login
     @app.route('/',methods = ['GET'])
     def index():
-        
-        return render_template('index.html')
+        return redirect(url_for('login'))
     
+    #login, basically the first page we get when we log into the website
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         if request.method == 'POST':
@@ -52,6 +52,7 @@ def configure_routes(app:Flask):
                 return render_template('login.html', error='Invalid credentials')
         return render_template('login.html')
 
+    #dashboard, user controls after logging in
     @app.route('/dashboard')
     def dashboard():
         print(facade.user)
@@ -60,12 +61,12 @@ def configure_routes(app:Flask):
         return render_template('dashboard.html', user=facade.user)
 
    
-    
+    #route for making a new customer with a form        
     @app.route('/create_customer', methods=['GET','POST'])
     def create_customer():
         if request.method == 'GET':
             try:
-                return render_template('create_customer.html')
+                return render_template('create_customer.html', action='create')
             except Exception as e:
                 pass
         if request.method == 'POST':
@@ -85,13 +86,13 @@ def configure_routes(app:Flask):
                     password = password,
                     email = email,
                     #all users created as customers, unless admin updates otherwise
-                    user_role = 3
+                    user_role = Role.CUSTOMER
                     
                 )   
                 facade.create_new_user(new_user)
                 repo = Repository(session=Session())
                 #internally fetching the customer from database to create a customer out of it's id & data
-                newobj = repo.get_user_by_username(new_user.username)
+                newobj = repo.get_user_by_username(new_user.username).all()
                 print('newobj:',newobj,'\n')
 
 
@@ -116,8 +117,106 @@ def configure_routes(app:Flask):
             except Exception as e:
                 app.logger.error(f"An error occurred: {str(e)}")
                 return render_template('create_customer.html', error='Internal server error')
-                # return jsonify({"error": str(e)}), 500
+    
+    #WIP, still needs object oriented magic
+    @app.route('/update_customer', methods=['GET','PUT'])
+    def update_customer():
+        if (request.method == 'GET'):
+            return render_template('/create_customer.html',action='update')
+        elif (request.method == 'PUT'):
+            first_name = request.form.get('first_name')
+            last_name = request.form.get('last_name')
+            address = request.form.get('address')
+            phone_no = request.form.get('phone_no')
+            credit_card_no = request.form.get('credit_card_no')
+            username = request.form.get('username')
+            password = request.form.get('password')
+            email = request.form.get('email')
+            updated_user_data = Users(
+                username = username,
+                password = password,
+                email = email,
+                #all users created as customers, unless admin updates otherwise
+                user_role = Role.CUSTOMER
+                    
+                )
+            newobj = Repository(session=Session()).get_user_by_username(username=username).all()
+            updated_customer_data = Customers(
+                    first_name=first_name,
+                    last_name=last_name,
+                    address=address,
+                    phone_no=phone_no,
+                    credit_card_no=credit_card_no,
+                    user_id = newobj[0][0]
+                )
+    #route for making a new admin with a form        
+    @app.route('/create_administrator', methods=['GET','POST'])
+    def create_administrator():
+        if request.method == 'GET':
+            try:
+                return render_template('create_administrator.html')
+            except Exception as e:
+                pass
+        if request.method == 'POST':
+            try:
+                print(request.form)
+                # get data from the form
+                first_name = request.form.get('first_name')
+                last_name = request.form.get('last_name')
+                username = request.form.get('username')
+                password = request.form.get('password')
+                email = request.form.get('email')
+                new_user = Users(
+                    username = username,
+                    password = password,
+                    email = email,
+                    #all users created as customers, unless admin updates otherwise
+                    user_role = Role.ADMINISTRATORS
+                    
+                )   
+                facade.create_new_user(new_user)
+                repo = Repository(session=Session())
+                #internally fetching the customer from database to create a customer out of it's id & data
+                newobj = repo.get_user_by_username(new_user.username).all()
+                print('newobj:',newobj,'\n')
+
+
+                # validation
+                if not all([first_name, last_name]):
+                    app.logger.error("Data provided incomplete, please refill the form")
+                    return render_template('create_customer.html', error='Data provided incomplete, please refill the form')
+
+                # Logic to create a new administrator instance and save it to the database...
+                new_admin = Administrators(
+                    first_name=first_name,
+                    last_name=last_name,
+                    user_id = newobj[0][0]
+                )
+                repo.add(new_admin)
+                repo.session.close()
+                return render_template('create_administrator.html',error='user created!')
+
+            except Exception as e:
+                app.logger.error(f"An error occurred: {str(e)}")
+                return render_template('create_administrator.html', error='Internal server error')
         
+    # @app.route('/customers', methods=['delete'])
+    # def delete_customer(data):
+    #     if isinstance(facade.user,AdministratorFacade):
+    #         print(data)
+    #         facade.user.remove_customer(data)
+    
+    
+    @app.route('/customers/<int:customer_id>', methods=['DELETE'])
+    def delete_customer(customer_id):
+        if isinstance(facade.user,AdministratorFacade):
+            print(customer_id)
+            try:
+                Repository(session=Session()).remove(Customers,customer_id)
+                return 'Customer deleted', 200
+            except:
+                return 'Customer not found', 404
+    
     
     #test for logging in to a certain facade of certain user, and attempting to create a flight from that user
     @app.route('/facade_test',methods = ['GET'])
@@ -164,23 +263,6 @@ def configure_routes(app:Flask):
         airlines = repo.get_all(AirlineCompanies)
         session.close()
         return render_template('index.html', airlines=airlines, allairlines=True)
-    
-    #test    
-    @app.route('/delete_customer', methods=['POST'])
-    def delete_customer():
-        try:
-            id = request.form.get('id')
-            if not id:
-                app.logger.error("Incomplete data provided")
-                return jsonify({"error": "Incomplete data provided"}), 400
-            session_instance = Session()
-            repo = Repository(session=session_instance)
-            customer = repo.get_by_id(Customers,id)
-            repo.remove(customer)
-            return jsonify({"message": "Customer removed successfully"}), 201
-        except Exception as e:
-            app.logger.error(f"An error occurred: {str(e)}")
-            return jsonify({"error": str(e)}), 500
     
     
     #test

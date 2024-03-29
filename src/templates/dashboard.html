@@ -29,13 +29,12 @@
             <option value="3">Add customer</option>
             <option value="4">Add administrator</option>
             <option value="5">Remove airline</option>
-            <option value="6">Remove customer</option>
             <option value="7">Remove administrator</option>
         </select>
         {%endif%}
 
         {% if user.role == 'Airline' %}
-        <select name="" id="" onchange="selectOption(this.value)">
+        <select name="action" id="actionSelect" onchange="selectOption(this.value)">
             <option>Action</option>
             <option value="8">Add airline</option> <!-- should this be registration form? -->
             <option value="9">Show my flights</option>
@@ -46,7 +45,7 @@
         </select>
         {%endif%}
         {% if user.role == 'Customer' %}
-        <select name="" id="" onchange="selectOption(this.value)">
+        <select name="action" id="actionSelect" onchange="selectOption(this.value)">
             <option>Action</option>
             <option value="14">Update customer data</option>
             <option value="15">Vouch for tickets</option>
@@ -76,15 +75,20 @@
                         break;
                     case "3":
                         console.log("Add customer");
+                        var selectedOption = document.getElementById("actionSelect").value;
+                        if (selectedOption) {
+                            window.location.href = "{{ url_for('create_customer') }}";
+                        }
                         break;
                     case "4":
                         console.log("Add administrator");
+                        var selectedOption = document.getElementById("actionSelect").value;
+                        if (selectedOption) {
+                            window.location.href = "{{ url_for('create_administrator') }}";
+                        }
                         break;
                     case "5":
                         console.log("Remove airline");
-                        break;
-                    case "6":
-                        console.log("Remove customer");
                         break;
                     case "7":
                         console.log("Remove administrator");
@@ -118,6 +122,10 @@
 
                     case "14":
                         console.log("Update customer data");
+                        var selectedOption = document.getElementById("actionSelect").value;
+                        if (selectedOption) {
+                            window.location.href = "{{ url_for('update_customer') }}";
+                        }
                         break;
 
                     case "15":

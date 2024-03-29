@@ -8,21 +8,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer list</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
 </head>
 
 <body>
     <h1>Customer list</h1>
-    <table>
+    <table id="customer-table">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>first name:</th>
-                <th>last name:</th>
-                <th>address:</th>
-                <th>phone number:</th>
-                <th>credit card number:</th>
-                <th>user id:</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Address</th>
+                <th>Phone Number</th>
+                <th>Credit Card Number</th>
+                <th>User ID</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -31,14 +31,46 @@
                 <td>{{ customer.id }}</td>
                 <td>{{ customer.first_name }}</td>
                 <td>{{ customer.last_name }}</td>
-                <td>{{ customer.addresss }}</td>
+                <td>{{ customer.address }}</td>
                 <td>{{ customer.phone_no }}</td>
                 <td>{{ customer.credit_card_no }}</td>
                 <td>{{ customer.user_id }}</td>
+                <td><button class="remove-customer-btn" data-customer-id="{{ customer.id }}">Remove</button></td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    <button style="margin-top: 70px;  " onclick="window.history.back()">
+        Return to previous page
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var removeButtons = document.querySelectorAll('.remove-customer-btn');
+
+            removeButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var customerId = button.getAttribute('data-customer-id');
+                    fetch('/customers/' + customerId, {
+                        method: 'DELETE'
+                    })
+                        .then(function (response) {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.text();
+                        })
+                        .then(function (data) {
+                            // Reload the page or update the table as needed
+                            location.reload();
+                        })
+                        .catch(function (error) {
+                            console.error('There was a problem with your fetch operation:', error);
+                        });
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
