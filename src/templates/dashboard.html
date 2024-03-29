@@ -25,11 +25,13 @@
         <select name="action" id="actionSelect" onchange="selectOption(this.value)">
             <option>Action</option>
             <option value="1">Show all customers</option>
+            <option value="6">Show all administrators</option>
+
             <option value="2">Add airline</option>
-            <option value="3">Add customer</option>
+
+            <option value="3">Add customer</option><!-- remove integrated within table-->
             <option value="4">Add administrator</option>
             <option value="5">Remove airline</option>
-            <option value="7">Remove administrator</option>
         </select>
         {%endif%}
 
@@ -92,6 +94,13 @@
                         break;
                     case "7":
                         console.log("Remove administrator");
+                        break;
+                    case "6":
+                        console.log("Show all administrators");
+                        var selectedOption = document.getElementById("actionSelect").value;
+                        if (selectedOption) {
+                            window.location.href = "{{ url_for('show_all_administrators') }}";
+                        }
                         break;
 
                     //Airline actions

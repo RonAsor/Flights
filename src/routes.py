@@ -26,6 +26,17 @@ def configure_routes(app:Flask):
             return render_template('users.html',users=users)
         return 'invalid'
     
+    #url for - show_all_administrators, administrators table
+    @app.route('/show_all_admins' ,methods=['GET'])
+    def show_all_administrators():
+        if isinstance(facade.user,AdministratorFacade):
+            administratorlist = Repository(session=Session()).get_all(Administrators)
+            return render_template('admins.html',administrators=administratorlist,admin_id=facade.user.token.id)
+        
+        return 'invalid'
+
+    
+    #route for showing the customer table
     @app.route('/show_all_customers' ,methods=['GET'])
     def show_all_customers():
         if isinstance(facade.user,AdministratorFacade):
@@ -33,34 +44,7 @@ def configure_routes(app:Flask):
             return render_template('customers.html',customers=customerlist)
         
         return 'invalid'
-
-    #index '/' page reroutes to login
-    @app.route('/',methods = ['GET'])
-    def index():
-        return redirect(url_for('login'))
     
-    #login, basically the first page we get when we log into the website
-    @app.route('/login', methods=['GET', 'POST'])
-    def login():
-        if request.method == 'POST':
-            username = request.form['username']
-            password = request.form['password']
-            facade.user = AnonymousFacade.login(facade,username, password)
-            if facade.user:
-                return redirect(url_for('dashboard'))
-            else:
-                return render_template('login.html', error='Invalid credentials')
-        return render_template('login.html')
-
-    #dashboard, user controls after logging in
-    @app.route('/dashboard')
-    def dashboard():
-        print(facade.user)
-        if not facade.user:
-            return redirect(url_for('login'))
-        return render_template('dashboard.html', user=facade.user)
-
-   
     #route for making a new customer with a form        
     @app.route('/create_customer', methods=['GET','POST'])
     def create_customer():
@@ -92,8 +76,8 @@ def configure_routes(app:Flask):
                 facade.create_new_user(new_user)
                 repo = Repository(session=Session())
                 #internally fetching the customer from database to create a customer out of it's id & data
-                newobj = repo.get_user_by_username(new_user.username).all()
-                print('newobj:',newobj,'\n')
+                new_customer_id = repo.get_all(Users)[-1].id
+                print('new_customer_id:',new_customer_id,'\n')
 
 
                 # validation
@@ -108,7 +92,7 @@ def configure_routes(app:Flask):
                     address=address,
                     phone_no=phone_no,
                     credit_card_no=credit_card_no,
-                    user_id = newobj[0][0]
+                    user_id = new_customer_id
                 )
                 repo.add(new_customer)
                 repo.session.close()
@@ -117,6 +101,57 @@ def configure_routes(app:Flask):
             except Exception as e:
                 app.logger.error(f"An error occurred: {str(e)}")
                 return render_template('create_customer.html', error='Internal server error')
+        
+    #route for deleting costumer from the table, database
+    @app.route('/customers/<int:customer_id>', methods=['DELETE'])
+    def delete_customer(customer_id):
+        if isinstance(facade.user,AdministratorFacade):
+            print(customer_id)
+            try:
+                Repository(session=Session()).remove(Customers,customer_id)
+                return 'Customer deleted', 200
+            except:
+                return 'Customer not found', 404
+    
+    #route for deleting an admin from the table, database
+    @app.route('/admins/<int:admin_id>', methods=['DELETE'])
+    def delete_admin(admin_id):
+        if isinstance(facade.user,AdministratorFacade):
+            print(admin_id)
+            try:
+                Repository(session=Session()).remove(Administrators,admin_id)
+                return 'Admin deleted', 200
+            except:
+                return 'Admin not found', 404
+
+    #index '/' page reroutes to login
+    @app.route('/',methods = ['GET'])
+    def index():
+        return redirect(url_for('login'))
+    
+    #login, basically the first page we get when we log into the website
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+            facade.user = AnonymousFacade.login(facade,username, password)
+            if facade.user:
+                return redirect(url_for('dashboard'))
+            else:
+                return render_template('login.html', error='Invalid credentials')
+        return render_template('login.html')
+
+    #dashboard, user controls after logging in
+    @app.route('/dashboard')
+    def dashboard():
+        print(facade.user)
+        if not facade.user:
+            return redirect(url_for('login'))
+        return render_template('dashboard.html', user=facade.user)
+
+   
+    
     
     #WIP, still needs object oriented magic
     @app.route('/update_customer', methods=['GET','PUT'])
@@ -147,7 +182,7 @@ def configure_routes(app:Flask):
                     address=address,
                     phone_no=phone_no,
                     credit_card_no=credit_card_no,
-                    user_id = newobj[0][0]
+                    user_id = facade.user.token.id
                 )
     #route for making a new admin with a form        
     @app.route('/create_administrator', methods=['GET','POST'])
@@ -177,8 +212,8 @@ def configure_routes(app:Flask):
                 facade.create_new_user(new_user)
                 repo = Repository(session=Session())
                 #internally fetching the customer from database to create a customer out of it's id & data
-                newobj = repo.get_user_by_username(new_user.username).all()
-                print('newobj:',newobj,'\n')
+                new_admin_id = repo.get_all(Users)[-1].id
+                print('newobj:',new_admin_id,'\n')
 
 
                 # validation
@@ -190,7 +225,7 @@ def configure_routes(app:Flask):
                 new_admin = Administrators(
                     first_name=first_name,
                     last_name=last_name,
-                    user_id = newobj[0][0]
+                    user_id = new_admin_id
                 )
                 repo.add(new_admin)
                 repo.session.close()
@@ -206,16 +241,7 @@ def configure_routes(app:Flask):
     #         print(data)
     #         facade.user.remove_customer(data)
     
-    
-    @app.route('/customers/<int:customer_id>', methods=['DELETE'])
-    def delete_customer(customer_id):
-        if isinstance(facade.user,AdministratorFacade):
-            print(customer_id)
-            try:
-                Repository(session=Session()).remove(Customers,customer_id)
-                return 'Customer deleted', 200
-            except:
-                return 'Customer not found', 404
+
     
     
     #test for logging in to a certain facade of certain user, and attempting to create a flight from that user

@@ -35,18 +35,19 @@ class Repository:
             return None
     
     def get_all(self, model: models, **kwargs):
-        '''
-        Gets all objects of a certain model, if kwargs not provided: return all, else search by those kwargs
-        '''
-        if kwargs is None:
+            '''
+            Gets all objects of a certain model, if kwargs not provided: return all, else search by those kwargs
+            '''
             query = self.session.query(model)
+            
+            # Apply filters based on kwargs
+            if kwargs:
+                query = query.filter_by(**kwargs)
+                
             results = query.all()
-            self.log_and_execute(f"Get all {model.__class__.__name__}", "get_all", query, crud_operation="READ")
-            return results
-        else:
-            query = self.session.query(model).filter_by(**kwargs)
-            results = query.all()
-            self.log_and_execute(f"Get all {model.__class__.__name__} with params={str(kwargs)}", "get_all", query, crud_operation="READ")
+            
+            self.log_and_execute(f"Get all {model.__name__} objects", "get_all", query.statement, crud_operation="READ")
+            
             return results
     
     def add(self, item: models):
@@ -73,7 +74,9 @@ class Repository:
         
     def remove(self, model: models, id: int=None):
         try:
+            print('hi')
             if id:
+                print('yes')
                 query = self.session.query(model).filter_by(id=id).all()
                 if query:
                     for obj in query:

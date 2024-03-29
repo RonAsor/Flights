@@ -1,34 +1,83 @@
 <!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airlines</title>
+    <title>Airline list</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
-    <h1>Airlines</h1>
-    <table>
+    <h1>Airline list</h1>
+    <table id="administrator-table">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Airline Name</th>
-                <th>Airline Country Code</th>
-                <th>Airline By User ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>User ID</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
-            {% for airline in airlines %}
+            {% for administrator in administrators %}
             <tr>
-                <td>{{ airline.id }}</td>
-                <td>{{ airline.airline_name }}</td>
-                <td>{{ airline.country_id }}</td>
-                <td>{{ airline.user_id }}</td>
+                <td>{{ administrator.id }}</td>
+                <td>{{ administrator.first_name }}</td>
+                <td>{{ administrator.last_name }}</td>
+                <td>{{ administrator.user_id }}</td>
+                {% if administrators|length > 1 %}
+                {%if admin_id!=administrator.user_id%}
+                <td>
+                    <button class="remove-administrator-btn" data-administrator-id="{{ administrator.id }}">Remove
+                    </button>
+                </td>
+                {%endif%}
+                {%endif%}
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    <button style="margin-top: 70px;  " onclick="window.history.back()">
+        Return to previous page
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+
+
+            var removeButtons = document.querySelectorAll('.remove-administrator-btn');
+            removeButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var administratorId = button.getAttribute('data-administrator-id');
+                    condition = confirm('Are you sure?');
+                    if (condition == true) {
+                        fetch('/admins/' + administratorId, {
+                            method: 'DELETE'
+                        })
+                            .then(function (response) {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.text();
+                            })
+                            .then(function (data) {
+                                // Reload the page or update the table as needed
+                                location.reload();
+                            })
+                            .catch(function (error) {
+                                console.error('There was a problem with your fetch operation:', error);
+                            })
+                    };
+                });
+            });
+        }
+        );
+    </script>
 </body>
+
 </html>

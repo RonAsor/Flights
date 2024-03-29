@@ -6,36 +6,37 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer list</title>
+    <title>Administrator list</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
-    <h1>Customer list</h1>
-    <table id="customer-table">
+    <h1>Administrator list</h1>
+    <table id="administrator-table">
         <thead>
             <tr>
                 <th>ID</th>
                 <th>First Name</th>
                 <th>Last Name</th>
-                <th>Address</th>
-                <th>Phone Number</th>
-                <th>Credit Card Number</th>
                 <th>User ID</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
-            {% for customer in customers %}
+            {% for administrator in administrators %}
             <tr>
-                <td>{{ customer.id }}</td>
-                <td>{{ customer.first_name }}</td>
-                <td>{{ customer.last_name }}</td>
-                <td>{{ customer.address }}</td>
-                <td>{{ customer.phone_no }}</td>
-                <td>{{ customer.credit_card_no }}</td>
-                <td>{{ customer.user_id }}</td>
-                <td><button class="remove-customer-btn" data-customer-id="{{ customer.id }}">Remove</button></td>
+                <td>{{ administrator.id }}</td>
+                <td>{{ administrator.first_name }}</td>
+                <td>{{ administrator.last_name }}</td>
+                <td>{{ administrator.user_id }}</td>
+                {% if administrators|length > 1 %}
+                {%if admin_id!=administrator.user_id%}
+                <td>
+                    <button class="remove-administrator-btn" data-administrator-id="{{ administrator.id }}">Remove
+                    </button>
+                </td>
+                {%endif%}
+                {%endif%}
             </tr>
             {% endfor %}
         </tbody>
@@ -49,13 +50,13 @@
 
 
 
-            var removeButtons = document.querySelectorAll('.remove-customer-btn');
+            var removeButtons = document.querySelectorAll('.remove-administrator-btn');
             removeButtons.forEach(function (button) {
                 button.addEventListener('click', function () {
-                    var customerId = button.getAttribute('data-customer-id');
+                    var administratorId = button.getAttribute('data-administrator-id');
                     condition = confirm('Are you sure?');
                     if (condition == true) {
-                        fetch('/customers/' + customerId, {
+                        fetch('/admins/' + administratorId, {
                             method: 'DELETE'
                         })
                             .then(function (response) {
