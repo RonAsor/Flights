@@ -1,0 +1,62 @@
+<!-- re.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create new airline</title>
+</head>
+
+<body>
+    {%if action=='create'%}
+    <h2>Create new airline</h2>
+    {% if error %}
+    <p>{{ error }}</p>
+    {% endif %}
+    <form action="/create_airline" method="POST">
+
+        <label for="airline_name">Airline Name:</label><br>
+        <input type="text" required id="airline_name" name="airline_name"><br>
+        <label for="country_id">Country ID:</label><br>
+        <input type="text" id="country_id" name="country_id"><br>
+        <label for="username">Username:</label><br>
+        <input type="text" required id="username" name="username"><br>
+        <label for="password">Password:</label><br>
+        <input type="text" required id="password" name="password"><br>
+        <label for="email">Email:</label><br>
+        <input type="text" required id="email" name="email"><br><br>
+        <input type="submit" value="Submit">
+    </form>
+    <button style="margin-top: 70px;  " onclick="window.history.back()">
+        Return to previous page
+    </button>
+    {%endif%}
+    {%if action=='update'%}
+    <h2>Update airline entry:</h2>
+    {% if error %}
+    <p>{{ error }}</p>
+    {% endif %}
+    <form action="/update_customer" method="PUT">
+
+        <label for="airline_name">Airline Name:</label><br>
+        <input type="text" required id="first_name" name="first_name"><br>
+        <label for="country_id">Country ID:</label><br>
+        <input type="text" id="last_name" name="last_name"><br>
+        <label for="username">Username:</label><br>
+        <input type="text" required id="username" name="username"><br>
+        <label for="password">Password:</label><br>
+        <input type="text" required id="password" name="password"><br>
+        <label for="email">Email:</label><br>
+        <input type="text" required id="email" name="email"><br><br>
+        <input type="submit" value="Update">
+    </form>
+    <button style="margin-top: 70px;  " onclick="window.history.back()">
+        Return to previous page
+    </button>
+
+    {%endif%}
+</body>
+
+</html>

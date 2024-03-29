@@ -21,10 +21,10 @@ class FacadesBase():
         repo = Repository(session=session)
         return repo.get_flights_by_parameters(origin_country_id,destination_country_id,date).fetchall()
         
-    def get_all_airlines(self):
+    def get_all_airlines(self)-> AirlineCompanies:
         session = Session()
         repo = Repository(session=session)
-        return repo.get_all(AirlineCompanies).fetchall()
+        return repo.get_all(AirlineCompanies)
     
     def get_airline_by_id(self, id: int):
         session = Session()

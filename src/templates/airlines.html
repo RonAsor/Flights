@@ -12,31 +12,27 @@
 
 <body>
     <h1>Airline list</h1>
-    <table id="administrator-table">
+    <table id="airline-table">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>First Name</th>
-                <th>Last Name</th>
+                <th>Airline Name</th>
+                <th>Country Id</th>
                 <th>User ID</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
-            {% for administrator in administrators %}
+            {% for airline in airlines %}
             <tr>
-                <td>{{ administrator.id }}</td>
-                <td>{{ administrator.first_name }}</td>
-                <td>{{ administrator.last_name }}</td>
-                <td>{{ administrator.user_id }}</td>
-                {% if administrators|length > 1 %}
-                {%if admin_id!=administrator.user_id%}
+                <td>{{ airline.id }}</td>
+                <td>{{ airline.airline_name }}</td>
+                <td>{{ airline.country_id }}</td>
+                <td>{{ airline.user_id }}</td>
                 <td>
-                    <button class="remove-administrator-btn" data-administrator-id="{{ administrator.id }}">Remove
+                    <button class="remove-airline-btn" data-airline-id="{{ airline.id }}">Remove
                     </button>
                 </td>
-                {%endif%}
-                {%endif%}
             </tr>
             {% endfor %}
         </tbody>
@@ -50,13 +46,13 @@
 
 
 
-            var removeButtons = document.querySelectorAll('.remove-administrator-btn');
+            var removeButtons = document.querySelectorAll('.remove-airline-btn');
             removeButtons.forEach(function (button) {
                 button.addEventListener('click', function () {
-                    var administratorId = button.getAttribute('data-administrator-id');
+                    var airlineId = button.getAttribute('data-airline-id');
                     condition = confirm('Are you sure?');
                     if (condition == true) {
-                        fetch('/admins/' + administratorId, {
+                        fetch('/airlines/' + airlineId, {
                             method: 'DELETE'
                         })
                             .then(function (response) {

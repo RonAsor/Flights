@@ -26,19 +26,16 @@
             <option>Action</option>
             <option value="1">Show all customers</option>
             <option value="6">Show all administrators</option>
-
+            <option value="5">Show all airlines</option>
             <option value="2">Add airline</option>
-
             <option value="3">Add customer</option><!-- remove integrated within table-->
             <option value="4">Add administrator</option>
-            <option value="5">Remove airline</option>
         </select>
         {%endif%}
 
         {% if user.role == 'Airline' %}
         <select name="action" id="actionSelect" onchange="selectOption(this.value)">
             <option>Action</option>
-            <option value="8">Add airline</option> <!-- should this be registration form? -->
             <option value="9">Show my flights</option>
             <option value="10">Update airline entry</option>
             <option value="11">Add flight</option>
@@ -73,7 +70,10 @@
                         break;
                     case "2":
                         console.log("Add airline")
-                        console.log(2);
+                        var selectedOption = document.getElementById("actionSelect").value;
+                        if (selectedOption) {
+                            window.location.href = "{{ url_for('create_airline') }}";
+                        }
                         break;
                     case "3":
                         console.log("Add customer");
@@ -90,10 +90,12 @@
                         }
                         break;
                     case "5":
-                        console.log("Remove airline");
+                        console.log("Show all airlines");
+                        var selectedOption = document.getElementById("actionSelect").value;
+                        if (selectedOption) {
+                            window.location.href = "{{ url_for('show_all_airlines') }}";
+                        }
                         break;
-                    case "7":
-                        console.log("Remove administrator");
                         break;
                     case "6":
                         console.log("Show all administrators");
@@ -105,9 +107,6 @@
 
                     //Airline actions
 
-                    case "8":
-                        console.log("Add Airline");
-                        break;
                     case "9":
                         console.log("Show my flights");
                         break;
