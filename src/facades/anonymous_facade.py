@@ -15,13 +15,14 @@ class AnonymousFacade(FacadesBase):
     
     def __init__(self):
         self.user = None
+        self.token = None
         super().__init__()
         
     def login(self, username: Users.username, password: Users.password)-> AdministratorFacade | AirlineCompanies | CustomerFacade:
         """login function that creates the token of the corresponding Facade, returns self.user which is a initialized object of the correct facade"""
         try:
             repo = Repository(session=Session())
-            user:Users = repo.get_user_by_username(username=username).one()
+            user:Users = repo.get_user_by_username(username=username)
             
             print(user.id,user.username,user.password,user.email,user.user_role,'\n\n')
             if user.password == password and user.username == username:
@@ -48,10 +49,10 @@ class AnonymousFacade(FacadesBase):
         except Exception as e:
             repo.log(f'error encountered '+str(e),state='error')
     
-    def add_customer(self,first_name: str, last_name: str, address: str, phone_no: str, credit_card_no: str, user_id: int):
+    def add_customer(self,customer:Customers):
         repo = Repository(session=Session())
-        print(user_id,self.user)
-        if user_id == self.user.token.id:
-            repo.add(Customers(first_name=first_name, last_name=last_name, address=address, phone_no=phone_no, credit_card_no=credit_card_no, user_id=user_id))
+        if customer.user_id:
+            repo.add(customer)
+            repo.session.close()
         else:
             raise ValueError('Unauthorized access of user')

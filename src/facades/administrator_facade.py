@@ -18,19 +18,19 @@ class AdministratorFacade(FacadesBase):
         repo.session.close()
         return customers
 
-    def add_airline(self,**kwargs):
+    def add_airline(self, airline:AirlineCompanies):
         repo = Repository(session=Session())
-        repo.add(AirlineCompanies(**kwargs))
+        repo.add(airline)
         repo.session.close()
 
-    def add_customer(self,**kwargs):
+    def add_customer(self, customer:Customers):
         repo = Repository(session=Session())
-        repo.add(Customers(**kwargs))
+        repo.add(customer)
         repo.session.close()
 
-    def add_administrator(self, **kwargs):
+    def add_administrator(self, admin:Administrators):
         repo = Repository(session=Session())
-        repo.add(Administrators(**kwargs))
+        repo.add(admin)
         repo.session.close()
 
     def remove_airline(self,airline:AirlineCompanies):

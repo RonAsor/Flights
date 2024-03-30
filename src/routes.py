@@ -16,10 +16,11 @@ facade = AnonymousFacade()
 
 def configure_routes(app:Flask):
     
+    
     #index '/' page reroutes to login
     @app.route('/',methods = ['GET'])
     def index():
-        return redirect(url_for('login'))
+        return redirect(url_for('show_flight_tracker'))
     
      #login, basically the first page we get when we log into the website
     @app.route('/login', methods=['GET', 'POST'])
@@ -42,7 +43,6 @@ def configure_routes(app:Flask):
             return redirect(url_for('login'))
         return render_template('dashboard.html', user=facade.user)
 
-
     #region  ###Administrator privilege###
     #userlist page, only accessible by administrator endpoint, not visible in dashboard
     @app.route('/users', methods=['GET'])
@@ -53,7 +53,7 @@ def configure_routes(app:Flask):
             users = repo.get_all(Users)
             session.close()
             return render_template('users.html',users=users)
-        return 'invalid'
+        return '',404
     
     #admin url for - show_all_administrators, administrators table
     @app.route('/show_all_admins' ,methods=['GET'])
@@ -62,7 +62,7 @@ def configure_routes(app:Flask):
             administratorlist = Repository(session=Session()).get_all(Administrators)
             return render_template('admins.html',administrators=administratorlist,admin_id=facade.user.token.id)
         
-        return 'invalid'
+        return '',404
 
     
     #admin route for showing the customer table
@@ -72,9 +72,49 @@ def configure_routes(app:Flask):
             customerlist = facade.user.get_all_customers()
             return render_template('customers.html',customers=customerlist)
         
-        return 'invalid'
+        return '',404
+    
     
     #admin route for showing the customer table
+    @app.route('/show_flight_tracker' ,methods=['GET'])
+    def show_flight_tracker():
+        if isinstance(facade.user,CustomerFacade):
+            if facade.user:
+                repo = Repository(session=Session())
+                user = repo.get_by_id(Users,facade.user.token.id)
+                customer = repo.get_user_by_username(username=user.username)
+                print ('Customer:\n',customer)
+                flight_list = facade.user.get_all_flights()
+                repo.session.close()
+                return render_template('flight_tracker.html',flights=flight_list,login=facade.user,customer=customer)
+        elif isinstance(facade.user,AirlineFacade):
+            if facade.user:
+                repo = Repository(session=Session())
+                user = repo.get_by_id(Users,facade.user.token.id)
+                airline = repo.get_airline_by_username(username=user.username)
+                print ('Airline:\n',airline)
+                flight_list = facade.user.get_all_flights()
+                repo.session.close()
+                return render_template('flight_tracker.html',flights=flight_list,login=facade.user,airline=airline)
+        elif isinstance(facade.user,AdministratorFacade):
+            if facade.user:
+                repo = Repository(session=Session())
+                user = repo.get_by_id(Users,facade.user.token.id)
+                admin = repo.get_user_by_username(username=user.username)
+                print ('Admin:\n',admin)
+                flight_list = facade.user.get_all_flights()
+                repo.session.close()
+                return render_template('flight_tracker.html',flights=flight_list,login=facade.user,admin=admin)
+        elif isinstance(facade,AnonymousFacade):
+            flight_list = facade.get_all_flights()
+            return render_template('flight_tracker.html',flights=flight_list,login=facade.user)
+        return render_template('flight_tracker.html',flights=flight_list,login=facade.user)
+            
+                
+        
+        return 'invalid'
+    
+    #admin route for showing the airlines table
     @app.route('/show_all_airlines' ,methods=['GET'])
     def show_all_airlines():
         if isinstance(facade.user,AdministratorFacade):
@@ -87,52 +127,53 @@ def configure_routes(app:Flask):
     #route for making a new admin with a form        
     @app.route('/create_administrator', methods=['GET','POST'])
     def create_administrator():
-        if request.method == 'GET':
-            try:
-                return render_template('create_administrator.html')
-            except Exception as e:
-                pass
-        if request.method == 'POST':
-            try:
-                print(request.form)
-                # get data from the form
-                first_name = request.form.get('first_name')
-                last_name = request.form.get('last_name')
-                username = request.form.get('username')
-                password = request.form.get('password')
-                email = request.form.get('email')
-                new_user = Users(
-                    username = username,
-                    password = password,
-                    email = email,
-                    #all users created as customers, unless admin updates otherwise
-                    user_role = Role.ADMINISTRATORS
+        if isinstance(facade.user,AdministratorFacade):
+            if request.method == 'GET':
+                try:
+                    return render_template('create_administrator.html')
+                except Exception as e:
+                    pass
+            if request.method == 'POST':
+                try:
+                    print(request.form)
+                    # get data from the form
+                    first_name = request.form.get('first_name')
+                    last_name = request.form.get('last_name')
+                    username = request.form.get('username')
+                    password = request.form.get('password')
+                    email = request.form.get('email')
+                    new_user = Users(
+                        username = username,
+                        password = password,
+                        email = email,
+                        #all users created as customers, unless admin updates otherwise
+                        user_role = Role.ADMINISTRATORS
+                        
+                    )  
                     
-                )  
-                
-                 # validation
-                if not all([first_name, last_name,username,password,email]):
-                    app.logger.error("Data provided incomplete, please refill the form")
-                    return render_template('create_administrator.html', error='Data provided incomplete, please refill the form',action='create')
-                facade.create_new_user(new_user)
-                repo = Repository(session=Session())
-                #internally fetching the administrator from database to create an administrator out of it's id & data
-                new_admin_id = repo.get_all(Users)[-1].id
-                print('newobj:',new_admin_id,'\n')
+                    # validation
+                    if not all([first_name, last_name,username,password,email]):
+                        app.logger.error("Data provided incomplete, please refill the form")
+                        return render_template('create_administrator.html', error='Data provided incomplete, please refill the form',action='create')
+                    facade.create_new_user(new_user)
+                    repo = Repository(session=Session())
+                    #internally fetching the administrator from database to create an administrator out of it's id & data
+                    new_admin_id = repo.get_all(Users)[-1].id
+                    print('newobj:',new_admin_id,'\n')
 
-                # Logic to create a new administrator instance and save it to the database...
-                new_admin = Administrators(
-                    first_name=first_name,
-                    last_name=last_name,
-                    user_id = new_admin_id
-                )
-                repo.add(new_admin)
-                repo.session.close()
-                return render_template('create_administrator.html',error='user created!',action='create')
+                    # Logic to create a new administrator instance and save it to the database...
+                    new_admin = Administrators(
+                        first_name=first_name,
+                        last_name=last_name,
+                        user_id = new_admin_id
+                    )
+                    facade.user.add_administrator(new_admin)
+                    return render_template('create_administrator.html',error='user created!',action='create')
 
-            except Exception as e:
-                app.logger.error(f"An error occurred: {str(e)}")
-                return render_template('create_administrator.html', error='Internal server error',action='create')
+                except Exception as e:
+                    app.logger.error(f"An error occurred: {str(e)}")
+                    return render_template('create_administrator.html', error='Internal server error',action='create')
+        return 'no',404
         
         #route for making a new customer with a form        
 
@@ -163,7 +204,6 @@ def configure_routes(app:Flask):
                 )  
                 
                 # validation
-                print(airline_name,country_id,username,password,email)
                 if not all([airline_name, country_id,username,password,email]):
                     app.logger.error("Data provided incomplete, please refill the form")
                     return render_template('create_airline.html', error='Data provided incomplete, please refill the form',action='create')
@@ -183,8 +223,8 @@ def configure_routes(app:Flask):
                     country_id=country_id,
                     user_id = new_airline_id
                 )
-                repo.add(new_airline)
-                repo.session.close()
+                facade.user.add_airline(new_airline)
+
                 return render_template('create_airline.html',error='user created!',action='create')
 
             except Exception as e:
@@ -223,6 +263,19 @@ def configure_routes(app:Flask):
                 return 'Airline deleted', 200
             except:
                 return 'Airline not found', 404
+
+    #route for deleting a flight from the table, database
+    @app.route('/flight/<int:flight_id>', methods=['DELETE'])
+    def delete_flight(flight_id):
+        if isinstance(facade.user,(AdministratorFacade,AirlineFacade)):
+            print(flight_id)
+            try:
+                Repository(session=Session()).remove(Flights,flight_id)
+                return 'Airline deleted', 200
+            except:
+                return 'Airline not found', 404
+
+
 
     ### End of Administrator privileges ###
     #endregion
@@ -277,19 +330,12 @@ def configure_routes(app:Flask):
                     credit_card_no=credit_card_no,
                     user_id = new_customer_id
                 )
-                repo.add(new_customer)
-                repo.session.close()
+                facade.add_customer(new_customer)
                 return render_template('create_customer.html',error='user created!',action='create')
 
             except Exception as e:
                 app.logger.error(f"An error occurred: {str(e)}")
                 return render_template('create_customer.html', error='Internal server error')
-    
-    
-
-    
-      
-    
     
     #WIP, still needs object oriented magic
     @app.route('/update_customer', methods=['GET','PUT'])
@@ -323,44 +369,6 @@ def configure_routes(app:Flask):
                     user_id = facade.user.token.id
                 )
     
-        
-    # @app.route('/customers', methods=['delete'])
-    # def delete_customer(data):
-    #     if isinstance(facade.user,AdministratorFacade):
-    #         print(data)
-    #         facade.user.remove_customer(data)
-    
-
-    
-    
-    #test for logging in to a certain facade of certain user, and attempting to create a flight from that user
-    @app.route('/facade_test',methods = ['GET'])
-    def facade_test():
-        flightuser:AirlineFacade|AdministratorFacade|CustomerFacade = AnonymousFacade().login('ronasor','hkjfl')
-        #add get airline id by user_id
-        flight = Flights(
-            airline_company_id = 3,
-            origin_country_id = 1,
-            destination_country_id=1,
-            departure_time = "2023-06-05 00:00:00.000",
-            landing_time= "2023-08-05 00:00:00.000",
-            remaining_tickets=5
-            )
-        print(flight)
-        if isinstance(flightuser,AirlineFacade):
-            print('airline facade')
-            AirlineFacade.add_flight(flightuser,flight)
-        elif isinstance(flightuser,AdministratorFacade):
-            AdministratorFacade.add_administrator(flightuser,flight)
-            print('admin facade')
-            
-        elif isinstance(flightuser,CustomerFacade):
-            CustomerFacade.add_ticket(flightuser,flight)
-            print('customer facade')
-            
-        return 'ok'
-    
-    
     #gets roles from the database, test presentation only
     @app.route('/user_roles', methods=['GET'])
     def roles():
@@ -369,30 +377,7 @@ def configure_routes(app:Flask):
         user_roles = repo.get_all(UserRoles)
         session.close()
         return render_template('user_roles.html', user_roles=user_roles)
-    
-    #shows all airlines, test
-    @app.route('/airlines', methods=['GET'])
-    def airlines():
-        session = Session()
-        repo = Repository(session)
-        airlines = repo.get_all(AirlineCompanies)
-        session.close()
-        return render_template('index.html', airlines=airlines, allairlines=True)
-    
-    
-    #test
-    @app.route('/get_all' ,methods=['POST'])
-    def get_all():
-        session = Session()
-        repo = Repository(session=session)
-        res:list[Administrators]=repo.get_all(Administrators)
-        listofadmin = []
-        for i in res:
-            print(i.first_name)
-            listofadmin.append({"name":i.first_name})
-        return jsonify(listofadmin),200
-    
-    
+
     #test
     @app.route('/prc_call', methods=['POST'])
     def prc_test():
@@ -402,9 +387,6 @@ def configure_routes(app:Flask):
         admin.first_name = 'eli'
         repo.update(admin)
         return "",200
-    
-
-
 
     if __name__ == '__main__':
         app.run(debug=True)

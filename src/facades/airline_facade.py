@@ -21,11 +21,6 @@ class AirlineFacade(FacadesBase):
         
         repo.log(f'error: found {len(airlines)} instead of 1','error')
         
-    def add_airline(self,airline: AirlineCompanies):
-        repo = Repository(session=Session())
-        repo.add(airline)
-        repo.log(f'Success adding airline {airline}','info')
-    
     
     #check what the update methods do, should update the existing values with values changed by the user and COMMIT them at the end. currently unsupported
     def update_airline(self,airline: AirlineCompanies):

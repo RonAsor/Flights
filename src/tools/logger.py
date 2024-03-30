@@ -15,4 +15,7 @@ class SingletonLogger:
         return cls._instance
 
     def get_logger(self):
+        """
+        Get the logger instance.
+        """
         return logging.getLogger()

@@ -74,7 +74,7 @@ go
 ALTER PROCEDURE prc_get_airline_by_username @_username varchar(255)
 as
 	begin
-		select ac.Airline_Name from Users u join Airline_Companies ac on u.id=ac.User_Id where u.Username = @_username
+		select ac.* from Users u join Airline_Companies ac on u.id=ac.User_Id where u.Username = @_username
 	end
 go
 
@@ -139,23 +139,25 @@ begin
 select * from Countries
 select * from Airline_Companies
 select * from Flights
-select * from User_Roles
-select * from Administrators
-select * from Customers
 select * from Users
+select * from User_Roles
+select * from Customers
+select * from Administrators
+
 select * from Tickets
 end
 go
 
 ---test for recent time
-insert into Flights values (3,1,1,'2024-01-19 00:00:00','2024-01-19 02:00:00',5)
-
+insert into Flights values (9,1,1,'2024-01-19 00:00:00','2024-01-19 02:00:00',5)
+insert into Administrators values ('ron','asor',89)
 --order of deletions
 delete from Tickets
 delete from Customers
 delete from Administrators
 delete from Users
-
+delete from Airline_Companies
+delete from Flights
 
 insert into Administrators values ('eli','israeli',5)
 
