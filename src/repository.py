@@ -39,14 +39,17 @@ class Repository:
             Gets all objects of a certain model, if kwargs not provided: return all, else search by those kwargs
             '''
             query = self.session.query(model)
-            print(query)
             # Apply filters based on kwargs
             if kwargs:
                 query = query.filter_by(**kwargs)
                 
             results = query.all()
             
-            self.log_and_execute(f"Get all {model.__name__} objects", "get_all", query.statement, crud_operation="READ")
+            if results:
+                self.log(f"Get all {model.__name__} objects get_all {query.statement} crud_operation=READ",state='info')
+            else:
+                results = None
+                self.log("Get all {model.__name__} objects get_all {query.statement} crud_operation=READ",state='error')
             
             return results
     
@@ -86,7 +89,7 @@ class Repository:
     #endregion    
         
     #region db_procedures
-    #needs uncluttering : execute_procedure, log_and_execute, log    
+    #needs uncluttering : log_and_execute, log    
     def get_airline_by_username(self, username: str) -> models.AirlineCompanies:
         query = "EXEC prc_get_airline_by_username @_username=:username"
         result = self.log_and_execute("Get airline by username", "get_airline_by_username", query, {"username": username},crud_operation='READ')
@@ -102,9 +105,7 @@ class Repository:
     def get_user_by_username(self, username: str) -> models.Users:
         query = "EXEC dbo.prc_get_user_by_username @_username=:username"
         result = self.log_and_execute("Get user by username", "get_user_by_username", query, {"username": username},crud_operation='READ')
-        print(result)
         data = result.one()
-        print(data)
         
         return data
 

@@ -7,45 +7,57 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flight list</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="../static/style.css">
 </head>
 
 <body>
-    <h1 style="margin:auto">Flight Tracker List</h1>
-    <table id="flight-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Airline Company ID</th>
-                <th>Origin Country ID</th>
-                <th>Destination Country ID</th>
-                <th>User ID</th>
-                <th>Departure Time</th>
-                <th>Landing Time</th>
-            </tr>
-        </thead>
-        <tbody>
-            {%if login.role%}
-            <h2>Profile: {{login.role}}</h2>
-            <h3>Username: {%if admin%}{{admin[1]}} Email: {{admin[3]}}{%endif%} {%if
-                customer%}{{customer[1]}} Email: {{customer[3]}}{%endif%}{%if
-                airline%}{{airline[1]}} Email:{{airline[3]}}{%endif%}<br></h3>
-            {%else%}
-            <h1>Anonymous user : <a href='/login'>Login</a></h1>
-            {%endif%}
-            {% for flight in flights %}
-            <tr>
-                <td>{{ flight.id }}</td>
-                <td>{{ flight.airline_company_id }}</td>
-                <td>{{ flight.origin_country_id }}</td>
-                <td>{{ flight.destination_country_id }}</td>
-                <td>{{ flight.departure_time }}</td>
-                <td>{{ flight.landing_time }}</td>
-                <td>{{ flight.remaining_tickets }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div style="margin:auto; text-align: center;">
+        <h1>Flight Tracker List</h1>
+        <table id="flight-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Airline Company ID</th>
+                    <th>Origin Country ID</th>
+                    <th>Destination Country ID</th>
+                    <th>Departure Time</th>
+                    <th>Landing Time</th>
+                    <th>Remaining Tickets</th>
+                    {%if actions=='ALelevated'%}
+                    <td style="font-weight: bold;">Actions</td>
+                    {%endif%}
+                </tr>
+            </thead>
+            <tbody>
+                {%if login.role%}
+                <h2 style="font-size: medium ;">Profile: {{login.role}}</h2>
+                <h3 style="font-size: small ;">Username: {%if admin%}{{admin[1]}} Email: {{admin[3]}}{%endif%} {%if
+                    customer%}{{customer[1]}} Email: {{customer[3]}}{%endif%}{%if
+                    airline%}{{airline[1]}} Email:{{airline[3]}}{%endif%}<br></h3>
+                {%else%}
+                <h1>Anonymous user : <a href='/login'>Login</a></h1>
+                {%endif%}
+                {% for flight in flights %}
+                <tr>
+                    <td>{{ flight.id }}</td>
+                    <td>{{ flight.airline_company_id }}</td>
+                    <td>{{ flight.origin_country_id }}</td>
+                    <td>{{ flight.destination_country_id }}</td>
+                    <td>{{ flight.departure_time }}</td>
+                    <td>{{ flight.landing_time }}</td>
+                    <td>{{ flight.remaining_tickets }}</td>
+                    {%if actions=='ALelevated'%}
+                    <td><button class=" remove-flight-btn" data-flight-id="{{ flight.id }}">Remove</button></td>
+                    {%endif%}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+    <button style="margin-top: 70px;" onclick="window.history.back()">
+        Return to previous page
+    </button>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

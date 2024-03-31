@@ -38,12 +38,12 @@
     {% if error %}
     <p>{{ error }}</p>
     {% endif %}
-    <form action="/update_customer" method="PUT">
-
+    <form action="/create_airline" method="POST">
+        <h1>update entry</h1>
         <label for="airline_name">Airline Name:</label><br>
-        <input type="text" required id="first_name" name="first_name"><br>
+        <input type="text" required id="airline_name" name="airline_name"><br>
         <label for="country_id">Country ID:</label><br>
-        <input type="text" id="last_name" name="last_name"><br>
+        <input type="text" id="country_id" name="country_id"><br>
         <label for="username">Username:</label><br>
         <input type="text" required id="username" name="username"><br>
         <label for="password">Password:</label><br>

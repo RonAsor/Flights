@@ -24,7 +24,6 @@ class AnonymousFacade(FacadesBase):
             repo = Repository(session=Session())
             user:Users = repo.get_user_by_username(username=username)
             
-            print(user.id,user.username,user.password,user.email,user.user_role,'\n\n')
             if user.password == password and user.username == username:
                 match user.user_role:
                     case Role.ADMINISTRATORS:

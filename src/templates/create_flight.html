@@ -1,0 +1,36 @@
+<!-- re.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create flight</title>
+</head>
+
+<body>
+    <h2>Create new flight</h2>
+    {% if error %}
+    <p>{{ error }}</p>
+    {% endif %}
+    <form action="/create_flight" method="POST">
+
+        <label for="origin_country_id">Origin Country Code:</label><br>
+        <input type="text" required id="origin_country_id" name="origin_country_id"><br>
+        <label for="destination_country_id">destination_country_id</label><br>
+        <input type="text" id="destination_country_id" name="destination_country_id"><br>
+        <label for="departure_time">departure_time:</label><br>
+        <input type="text" required id="departure_time" name="departure_time"><br>
+        <label for="landing_time">landing_time:</label><br>
+        <input type="text" required id="landing_time" name="landing_time"><br>
+        <label for="remaining_tickets">remaining_tickets</label><br>
+        <input type="text" required id="remaining_tickets" name="remaining_tickets"><br><br>
+        <input type="submit" value="Submit">
+    </form>
+    <button style="margin-top: 70px;  " onclick="window.history.back()">
+        Return to previous page
+    </button>
+</body>
+
+</html>

@@ -6,26 +6,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/style.css">
     <title>Login</title>
 </head>
 
 <body>
-    <h2>Login</h2>
-    {% if error %}
-    <p>{{ error }}</p>
-    {% endif %}
-    <form action="/login" method="post">
-        <label for="username">Username:</label><br>
-        <input type="text" id="username" name="username"><br>
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password"><br><br>
-        <input type="submit" value="Login">
-        <hr><br>
-        <button><a style="color:black; text-decoration: none;" href="{{ url_for('create_customer') }}">Register new
-                user</a></button>
+    <div style="text-align: center;">
+        <h2>Login</h2>
+        {% if error %}
+        <p>{{ error }}</p>
+        {% endif %}
+        <form action="/login" method="post">
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username"><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password"><br><br>
+            <input type="submit" value="Login">
+            <hr><br>
+            <button><a style="color:black; text-decoration: none;" href="{{ url_for('create_customer') }}">Register new
+                    user</a></button>
 
-
-    </form>
+        </form>
+    </div>
 </body>
 
 </html>

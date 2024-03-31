@@ -155,8 +155,8 @@ insert into Administrators values ('ron','asor',89)
 delete from Tickets
 delete from Customers
 delete from Administrators
-delete from Users
-delete from Airline_Companies
+delete from Users 
+delete from Airline_Companies 
 delete from Flights
 
 insert into Administrators values ('eli','israeli',5)
@@ -167,7 +167,7 @@ insert into Airline_Companies values ('chakair',1,2) --using int as ids
 insert into Customers values ('Ron','Asor','m.h','028502375','5598293','2')
 insert into Flights values (3,1,1,'2023-05-05 00:00:00','2023-08-05 00:00:00',5)
 insert into Tickets values (2,26)
-exec prc_get_airline_by_username 'ronasor'
+exec prc_get_airline_by_username 'stration'
 exec prc_get_customer_by_username 'ronasor'
 exec prc_get_arrival_flights 1
 exec prc_get_departure_flights 1

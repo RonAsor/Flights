@@ -83,25 +83,35 @@ def configure_routes(app:Flask):
                 repo = Repository(session=Session())
                 user = repo.get_by_id(Users,facade.user.token.id)
                 customer = repo.get_user_by_username(username=user.username)
-                print ('Customer:\n',customer)
                 flight_list = facade.user.get_all_flights()
                 repo.session.close()
                 return render_template('flight_tracker.html',flights=flight_list,login=facade.user,customer=customer)
         elif isinstance(facade.user,AirlineFacade):
+        
+        
             if facade.user:
+                #if accessing flight_tracker
+                if not request.args.get('action') == 'show_my_flights':
+                    repo = Repository(session=Session())
+                    #gets user by token, then get the airline
+                    user = repo.get_by_id(Users,facade.user.token.id)
+                    airline = repo.get_user_by_username(username=user.username)
+                    flight_list = facade.user.get_all_flights()
+                    repo.session.close()
+                    return render_template('flight_tracker.html',flights=flight_list,login=facade.user,airline=airline)
+                
+                #if accessed through airline dashboard to show my flights
                 repo = Repository(session=Session())
                 user = repo.get_by_id(Users,facade.user.token.id)
-                airline = repo.get_airline_by_username(username=user.username)
-                print ('Airline:\n',airline)
-                flight_list = facade.user.get_all_flights()
+                airline = repo.get_user_by_username(username=user.username)
+                my_flight_list = facade.user.get_my_flights(repo.get_airline_by_username(airline.username).id)
                 repo.session.close()
-                return render_template('flight_tracker.html',flights=flight_list,login=facade.user,airline=airline)
+                return render_template('flight_tracker.html',flights=my_flight_list,login=facade.user,airline=airline,actions='ALelevated')
         elif isinstance(facade.user,AdministratorFacade):
             if facade.user:
                 repo = Repository(session=Session())
                 user = repo.get_by_id(Users,facade.user.token.id)
                 admin = repo.get_user_by_username(username=user.username)
-                print ('Admin:\n',admin)
                 flight_list = facade.user.get_all_flights()
                 repo.session.close()
                 return render_template('flight_tracker.html',flights=flight_list,login=facade.user,admin=admin)
@@ -109,10 +119,6 @@ def configure_routes(app:Flask):
             flight_list = facade.get_all_flights()
             return render_template('flight_tracker.html',flights=flight_list,login=facade.user)
         return render_template('flight_tracker.html',flights=flight_list,login=facade.user)
-            
-                
-        
-        return 'invalid'
     
     #admin route for showing the airlines table
     @app.route('/show_all_airlines' ,methods=['GET'])
@@ -135,7 +141,6 @@ def configure_routes(app:Flask):
                     pass
             if request.method == 'POST':
                 try:
-                    print(request.form)
                     # get data from the form
                     first_name = request.form.get('first_name')
                     last_name = request.form.get('last_name')
@@ -159,7 +164,6 @@ def configure_routes(app:Flask):
                     repo = Repository(session=Session())
                     #internally fetching the administrator from database to create an administrator out of it's id & data
                     new_admin_id = repo.get_all(Users)[-1].id
-                    print('newobj:',new_admin_id,'\n')
 
                     # Logic to create a new administrator instance and save it to the database...
                     new_admin = Administrators(
@@ -178,58 +182,145 @@ def configure_routes(app:Flask):
         #route for making a new customer with a form        
 
     #route for making a new airline with a form        
-    @app.route('/create_airline', methods=['GET','POST'])
+    @app.route('/create_airline', methods=['GET','POST','PUT'])
     def create_airline():
         if request.method == 'GET':
             try:
-                return render_template('create_airline.html', action='create')
+                if isinstance(facade.user,AdministratorFacade):
+                    if not request.args.get('action') == 'update':
+                        return render_template('create_airline.html', action='create')
+                
+                else:
+                    
+                    return render_template('create_airline.html',action='update')
+                
             except Exception as e:
                 pass
+            
+        #POST for updating a company
         if request.method == 'POST':
-            try:
-                print(request.form)
-                # get data from the form
+            if isinstance(facade.user, AirlineFacade):
                 airline_name = request.form.get('airline_name')
                 country_id = request.form.get('country_id')
                 username = request.form.get('username')
                 password = request.form.get('password')
                 email = request.form.get('email')
-                new_user = Users(
-                    username = username,
-                    password = password,
-                    email = email,
-                    #all users created as customers, unless admin updates otherwise
-                    user_role = Role.FLIGHTCOMPANY
-                    
-                )  
                 
-                # validation
-                if not all([airline_name, country_id,username,password,email]):
-                    app.logger.error("Data provided incomplete, please refill the form")
-                    return render_template('create_airline.html', error='Data provided incomplete, please refill the form',action='create')
-                
-                facade.create_new_user(new_user)
                 repo = Repository(session=Session())
-                #internally fetching the customer from database to create a customer out of it's id & data
-                new_airline_id = repo.get_all(Users)[-1].id
-                print('new_airline_id:',new_airline_id,'\n')
-
-
                 
+                # Fetch user object
+                user = repo.get_by_id(Users, facade.user.token.id)
+                
+                # Fetch airline object
+                airline = repo.get_airline_by_username(user.username)
+                airline = AirlineCompanies(id=airline.id, airline_name=airline.airline_name, country_id=airline.country_id, user_id=airline.user_id)
+                
+                # Update airline attributes
+                airline.airline_name = airline_name
+                airline.country_id = country_id
+                
+                # Commit airline changes
+                repo.update(airline)
+                
+                # Update user attributes
+                user.username = username
+                user.password = password
+                user.email = email
+                user.user_role = 2
+                
+                # Commit user changes
+                repo.update(user)
+                return redirect(url_for('dashboard'))
+            if isinstance(facade.user,AdministratorFacade):
+                try:
+                    # get data from the form
+                    airline_name = request.form.get('airline_name')
+                    country_id = request.form.get('country_id')
+                    username = request.form.get('username')
+                    password = request.form.get('password')
+                    email = request.form.get('email')
+                    new_user = Users(
+                        username = username,
+                        password = password,
+                        email = email,
+                        #all users created as customers, unless admin updates otherwise
+                        user_role = Role.FLIGHTCOMPANY
+                        
+                    )  
+                    # validation
+                    if not all([airline_name, country_id,username,password,email]):
+                        app.logger.error("Data provided incomplete, please refill the form")
+                        return render_template('create_airline.html', error='Data provided incomplete, please refill the form',action='create')
+                    
+                    facade.create_new_user(new_user)
+                    repo = Repository(session=Session())
+                    #internally fetching the customer from database to create a customer out of it's id & data
+                    new_airline_id = repo.get_all(Users)[-1].id
 
-                # Logic to create a new customer instance and save it to the database...
-                new_airline = AirlineCompanies(
-                    airline_name=airline_name,
-                    country_id=country_id,
-                    user_id = new_airline_id
-                )
-                facade.user.add_airline(new_airline)
+                    # Logic to create a new customer instance and save it to the database...
+                    new_airline = AirlineCompanies(
+                        airline_name=airline_name,
+                        country_id=country_id,
+                        user_id = new_airline_id
+                    )
+                    facade.user.add_airline(new_airline)
 
-                return render_template('create_airline.html',error='user created!',action='create')
+                    return render_template('create_airline.html',error='user created!',action='create')
+
+                except Exception as e:
+                    app.logger.error(f"An error occurred: {str(e)}")
+                    return render_template('create_airline.html', error='Internal server error',action='create')
+            else:
+                return '',404
+        #route for making a new airline with a form        
+    @app.route('/create_flight', methods=['GET','POST'])
+    def create_flight():
+        if request.method == 'GET':
+            try:
+                if isinstance(facade.user,AirlineFacade):
+                    return render_template('create_flight.html', action='create')
+                else:
+                    return '',404
+            except Exception as e:
+                pass
+        if request.method == 'POST':
+            try:
+                if isinstance(facade.user,AirlineFacade):
+                    print(request.form)
+                    # get data from the form
+                    repo = Repository(session=Session())
+                    airlineobj = repo.get_airline_by_username(repo.get_by_id(Users,facade.user.token.id).username)
+                    
+                    
+                    origin_country_id = request.form.get('origin_country_id')
+                    destination_country_id = request.form.get('destination_country_id')
+                    departure_time = request.form.get('departure_time')
+                    landing_time = request.form.get('landing_time')
+                    remaining_tickets = request.form.get('remaining_tickets')
+                    airline_company_id=airlineobj.id
+                    
+                    new_flight = Flights(
+                        airline_company_id=airline_company_id,
+                        origin_country_id=origin_country_id,
+                        destination_country_id=destination_country_id,
+                        departure_time = departure_time,
+                        landing_time = landing_time,
+                        remaining_tickets = remaining_tickets,
+                    )  
+                    
+                    # validation
+                    if not all([origin_country_id, destination_country_id,departure_time,landing_time,remaining_tickets,airlineobj.id]):
+                        app.logger.error("Data provided incomplete, please refill the form")
+                        return render_template('create_flight.html', error='Data provided incomplete, please refill the form',action='create')
+                    dbflight = facade.user.add_flight(flight=new_flight).id
+                    #implemented return object, so we can pick the created id from the db, not sure if this is necessary during creation though, not done on the other class objects.
+                    
+                    #internally fetching the customer from database to create a customer out of it's id & data
+                    return render_template('create_flight.html',error='flight created!',action='create')
 
             except Exception as e:
                 app.logger.error(f"An error occurred: {str(e)}")
-                return render_template('create_airline.html', error='Internal server error',action='create')
+                return render_template('create_flight.html', error='Internal server error',action='create')
         
     #route for deleting customer from the table, database
     @app.route('/customers/<int:customer_id>', methods=['DELETE'])
@@ -265,7 +356,7 @@ def configure_routes(app:Flask):
                 return 'Airline not found', 404
 
     #route for deleting a flight from the table, database
-    @app.route('/flight/<int:flight_id>', methods=['DELETE'])
+    @app.route('/flights/<int:flight_id>', methods=['DELETE'])
     def delete_flight(flight_id):
         if isinstance(facade.user,(AdministratorFacade,AirlineFacade)):
             print(flight_id)

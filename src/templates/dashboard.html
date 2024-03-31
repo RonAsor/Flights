@@ -13,47 +13,50 @@
 </head>
 
 <body>
-    <h2>Dashboard</h2>
-    <p>Welcome {{username}} {{ user.role }}!</p>
+    <div style="margin: auto; text-align: center;">
+        <h2>Dashboard</h2>
+        <p>Welcome {{username}} {{ user.role }}!</p>
 
-    <!-- Dropdown button -->
-    <div class="dropdown">
-        <!-- class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown"
+        <!-- Dropdown button -->
+        <div class="dropdown">
+            <!-- class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown"
             aria-expanded="false" -->
 
-        {% if user.role == 'Administrator' %}
-        <select name="action" id="actionSelect" onchange="selectOption(this.value)">
-            <option>Action</option>
-            <option value="1">Show all customers</option>
-            <option value="6">Show all administrators</option>
-            <option value="5">Show all airlines</option>
-            <option value="2">Add airline</option>
-            <option value="3">Add customer</option><!-- remove integrated within table-->
-            <option value="4">Add administrator</option>
-        </select>
-        {%endif%}
+            {% if user.role == 'Administrator' %}
+            <select name="action" id="actionSelect" onchange="selectOption(this.value)">
+                <option>Action:</option>
+                <option value="1">Show all customers</option>
+                <option value="6">Show all administrators</option>
+                <option value="5">Show all airlines</option>
+                <option value="2">Add airline</option>
+                <option value="3">Add customer</option><!-- remove integrated within table-->
+                <option value="4">Add administrator</option>
+            </select>
+            {%endif%}
 
-        {% if user.role == 'Airline' %}
-        <select name="action" id="actionSelect" onchange="selectOption(this.value)">
-            <option>Action</option>
-            <option value="9">Show my flights</option>
-            <option value="10">Update airline entry</option>
-            <option value="11">Add flight</option>
-            <option value="12">Update flight entry</option>
-            <option value="13">Remove flight</option>
-        </select>
-        {%endif%}
-        {% if user.role == 'Customer' %}
-        <select name="action" id="actionSelect" onchange="selectOption(this.value)">
-            <option>Action</option>
-            <option value="14">Update customer data</option>
-            <option value="15">Vouch for tickets</option>
-            <option value="16">Cancel ticket vouchers</option>
-            <option value="17">Show my tickets</option>
-        </select>
-        {%endif%}
+            {% if user.role == 'Airline' %}
+            <select style="text-align: center;" name="action" id="actionSelect" onchange="selectOption(this.value)">
+                <option>Action:</option>
+                <option value="9">Show my flights</option>
+                <option value="10" onselect="javascript:fetch('/create_airline?action=update')">Update airline entry
+                </option>
+                <option value="11">Add flight</option>
+                <option value="12">Update flight entry</option>
+            </select>
+            {%endif%}
+            {% if user.role == 'Customer' %}
+            <select name="action" id="actionSelect" onchange="selectOption(this.value)">
+                <option>Action:</option>
+                <option value="14">Update customer data</option>
+                <option value="15">Vouch for tickets</option>
+                <option value="16">Cancel ticket vouchers</option>
+                <option value="17">Show my tickets</option>
+            </select>
+            {%endif%}
+        </div>
+        <div id="flightTrackerContainer"></div>
     </div>
-    <div id="flightTrackerContainer"></div>
+
 
     <script>
         function loadFlightTracker() {
@@ -123,13 +126,25 @@
 
                     case "9":
                         console.log("Show my flights");
+                        var selectedOption = document.getElementById("actionSelect").value;
+                        if (selectedOption) {
+                            window.location.href = "{{ url_for('show_flight_tracker') }}?action=show_my_flights";
+                        }
                         break;
 
                     case "10":
                         console.log("Update airline entry");
+                        var selectedOption = document.getElementById("actionSelect").value;
+                        if (selectedOption) {
+                            window.location.href = "{{ url_for('create_airline') }}?action=update";
+                        }
                         break;
                     case "11":
                         console.log("Add flight");
+                        var selectedOption = document.getElementById("actionSelect").value;
+                        if (selectedOption) {
+                            window.location.href = "{{ url_for('create_flight') }}";
+                        }
                         break;
 
                     case "12":
@@ -170,6 +185,7 @@
 
 
     </script>
+
 </body>
 
 </html>
