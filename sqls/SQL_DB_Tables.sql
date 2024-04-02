@@ -82,7 +82,7 @@ go
 ALTER PROCEDURE prc_get_customer_by_username @_username varchar(255)
 as
 	begin
-		select concat(c.First_Name,' ',c.Last_Name) from Users u join Customers c on u.id=c.User_Id where u.Username = @_username
+		select u.*,c.* from Users u join Customers c on u.id=c.User_Id where u.Username = @_username
 	end
 go
 
@@ -136,8 +136,9 @@ go
 
 
 begin
-select * from Countries
 
+
+select * from Countries
 select * from Flights
 select * from Airline_Companies 
 select * from Users
@@ -163,7 +164,7 @@ delete from Flights
 insert into Administrators values ('eli','israeli',5)
 
 insert into Users values ('pom','pom','jkl@gmail.com',1)
-insert into Countries values ('Israel','')
+insert into Countries values ('Cairo')
 insert into Airline_Companies values ('chakair',1,92) --using int as ids
 insert into Customers values ('Ron','Asor','m.h','028502375','5598293','2')
 insert into Flights values (3,1,1,'2023-05-05 00:00:00','2023-08-05 00:00:00',5)

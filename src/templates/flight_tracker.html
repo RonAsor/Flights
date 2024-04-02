@@ -11,6 +11,7 @@
 </head>
 
 <body>
+    {%block body%}
     <div style="margin:auto; text-align: center;">
         <h1>Flight Tracker List</h1>
         <table id="flight-table">
@@ -35,7 +36,7 @@
                     customer%}{{customer[1]}} Email: {{customer[3]}}{%endif%}{%if
                     airline%}{{airline[1]}} Email:{{airline[3]}}{%endif%}<br></h3>
                 {%else%}
-                <h1>Anonymous user : <a href='/login'>Login</a></h1>
+                <h1>Guest user : <a href='/login'>Login</a></h1>
                 {%endif%}
                 {% for flight in flights %}
                 <tr>
@@ -58,7 +59,7 @@
     <button style="margin-top: 70px;" onclick="window.history.back()">
         Return to previous page
     </button>
-
+    {%endblock%}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 

@@ -25,32 +25,45 @@
             {% if user.role == 'Administrator' %}
             <select name="action" id="actionSelect" onchange="selectOption(this.value)">
                 <option>Action:</option>
-                <option value="1">Show all customers</option>
-                <option value="6">Show all administrators</option>
-                <option value="5">Show all airlines</option>
-                <option value="2">Add airline</option>
-                <option value="3">Add customer</option><!-- remove integrated within table-->
-                <option value="4">Add administrator</option>
+                <option value="{{ url_for('show_all_customers') }}">Show all customers</option>
+                <option value="{{ url_for('show_all_administrators') }}">Show all administrators</option>
+                <option value="{{ url_for('show_all_airlines') }}">Show all airlines</option>
+                <option value="{{ url_for('create_airline') }}">Add airline</option>
+                <option value="{{ url_for('create_customer') }}">Add customer</option>
+                <!-- remove integrated within table-->
+                <option value="{{ url_for('create_administrator') }}">Add administrator</option>
             </select>
             {%endif%}
 
             {% if user.role == 'Airline' %}
             <select style="text-align: center;" name="action" id="actionSelect" onchange="selectOption(this.value)">
                 <option>Action:</option>
-                <option value="9">Show my flights</option>
-                <option value="10" onselect="javascript:fetch('/create_airline?action=update')">Update airline entry
+                <option value="{{ url_for('show_flight_tracker') }}?action=show_my_flights">Show my flights</option>
+                <option value="{{ url_for('create_airline') }}?action=update"
+                    onselect="javascript:fetch('/create_airline?action=update')">Update airline entry
                 </option>
-                <option value="11">Add flight</option>
+                <option value="{{ url_for('create_flight') }}">Add flight</option>
                 <option value="12">Update flight entry</option>
             </select>
             {%endif%}
             {% if user.role == 'Customer' %}
             <select name="action" id="actionSelect" onchange="selectOption(this.value)">
                 <option>Action:</option>
-                <option value="14">Update customer data</option>
+                <option value="{{ url_for('update_customer') }}">Update customer data</option>
                 <option value="15">Vouch for tickets</option>
                 <option value="16">Cancel ticket vouchers</option>
                 <option value="17">Show my tickets</option>
+            </select>
+            {%endif%}
+            {% if not user.role %}
+            <select name="action" id="actionSelect" onchange="selectOption(this.value)">
+                <option>Action:</option>
+                <option value="18">Get flight by id</option>
+                <option value="19">Get flights by parameters</option>
+                <option value="20">Show all airlines</option>
+                <option value="21">Show Airline by ID</option>
+                <option value="22">Show Airline by parameters</option>
+                <option value="23">Show country by id</option>
             </select>
             {%endif%}
         </div>
@@ -60,7 +73,6 @@
 
 
     <script>
-
         function loadFlightTracker() {
             // Send an AJAX request to the '/show_flight_tracker' route
             fetch('/show_flight_tracker')
@@ -77,78 +89,12 @@
 
         function selectOption(option) {
 
-            //Administrator actions
+            //Administrator actions:
             if (option) {
+                window.location.href = option
                 switch (option) {
-                    case "1":
-                        console.log("Show all customers");
-                        var selectedOption = document.getElementById("actionSelect").value;
-                        if (selectedOption) {
-                            window.location.href = "{{ url_for('show_all_customers') }}";
-                        }
+                    default:
                         break;
-                    case "2":
-                        console.log("Add airline")
-                        var selectedOption = document.getElementById("actionSelect").value;
-                        if (selectedOption) {
-                            window.location.href = "{{ url_for('create_airline') }}";
-                        }
-                        break;
-                    case "3":
-                        console.log("Add customer");
-                        var selectedOption = document.getElementById("actionSelect").value;
-                        if (selectedOption) {
-                            window.location.href = "{{ url_for('create_customer') }}";
-                        }
-                        break;
-                    case "4":
-                        console.log("Add administrator");
-                        var selectedOption = document.getElementById("actionSelect").value;
-                        if (selectedOption) {
-                            window.location.href = "{{ url_for('create_administrator') }}";
-                        }
-                        break;
-                    case "5":
-                        console.log("Show all airlines");
-                        var selectedOption = document.getElementById("actionSelect").value;
-                        if (selectedOption) {
-                            window.location.href = "{{ url_for('show_all_airlines') }}";
-                        }
-                        break;
-                        break;
-                    case "6":
-                        console.log("Show all administrators");
-                        var selectedOption = document.getElementById("actionSelect").value;
-                        if (selectedOption) {
-                            window.location.href = "{{ url_for('show_all_administrators') }}";
-                        }
-                        break;
-
-                    //Airline actions
-
-                    case "9":
-                        console.log("Show my flights");
-                        var selectedOption = document.getElementById("actionSelect").value;
-                        if (selectedOption) {
-                            window.location.href = "{{ url_for('show_flight_tracker') }}?action=show_my_flights";
-                        }
-                        break;
-
-                    case "10":
-                        console.log("Update airline entry");
-                        var selectedOption = document.getElementById("actionSelect").value;
-                        if (selectedOption) {
-                            window.location.href = "{{ url_for('create_airline') }}?action=update";
-                        }
-                        break;
-                    case "11":
-                        console.log("Add flight");
-                        var selectedOption = document.getElementById("actionSelect").value;
-                        if (selectedOption) {
-                            window.location.href = "{{ url_for('create_flight') }}";
-                        }
-                        break;
-
                     case "12":
                         console.log("Update flight entry");
                         break;
@@ -157,29 +103,41 @@
                         console.log("Remove flight");
                         break;
 
-                    //Customer actions
+                    //Customer actions:
 
                     case "14":
                         console.log("Update customer data");
-                        var selectedOption = document.getElementById("actionSelect").value;
-                        if (selectedOption) {
-                            window.location.href = "{{ url_for('update_customer') }}";
-                        }
                         break;
-
                     case "15":
                         console.log("Vouch for tickets");
                         break;
-
                     case "16":
                         console.log("Cancel ticket vouchers");
                         break;
-
                     case "17":
+
+                        //Guest Actions:
+
                         console.log("Show my tickets");
                         break;
-
-
+                    case "18":
+                        console.log("Get flight by id");
+                        break;
+                    case "19":
+                        console.log("Get flights by parameters");
+                        break;
+                    case "20":
+                        console.log("Show all airlines");
+                        break;
+                    case "21":
+                        console.log("Show Airline by ID");
+                        break;
+                    case "22":
+                        console.log("Show Airline by parameters");
+                        break;
+                    case "23":
+                        console.log("Show country by id");
+                        break;
                 }
 
             }

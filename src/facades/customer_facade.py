@@ -11,14 +11,24 @@ class CustomerFacade(FacadesBase):
         self.token = token
         self.role = 'Customer'
         
-    
-    def update_customer(self,customer:Customers):
-        repo = Repository(session=Session())
-        ###
-        repo.update(customer)
-        self.customer = customer
-        repo.session.close()
-        
+    def update_customer(self,customer:Customers,user:Users,repo:Repository=None):
+        try:
+            if not repo:
+                repo = Repository(session=Session())
+                repo.log(f'Commiting : {customer} with id: {customer.id}, and {user} with {user.id}','info')
+                repo.update()
+                repo.session.close()
+                return True
+            if repo:
+                repo.log(f'Commiting : {customer.__tablename__} with id: {customer.id}, and {user.__tablename__} with {user.id}','info')
+                repo.update()
+                repo.session.close()
+                return True
+
+        except Exception as e:
+            repo.log(f'FAILED Commiting : {customer.__tablename__} with id: {customer.id}, and {user.__tablename__} with {user.id}, with error code {e}','error')
+            return False
+            
     def add_ticket(ticket:Tickets):
         repo = Repository(session=Session())
         repo.add(ticket)

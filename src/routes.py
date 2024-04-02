@@ -42,7 +42,7 @@ def configure_routes(app:Flask):
     def dashboard():
         print(facade.user)
         if not facade.user:
-            return redirect(url_for('login'))
+            return render_template('dashboard.html',user=None)
         return render_template('dashboard.html', user=facade.user)
 
     #region  ###Administrator privilege###
@@ -189,7 +189,7 @@ def configure_routes(app:Flask):
         #route for making a new customer with a form        
 
     #route for making a new airline with a form        
-    @app.route('/create_airline', methods=['GET','POST','PUT'])
+    @app.route('/create_airline', methods=['GET','POST'])
     def create_airline():
         if request.method == 'GET':
             try:
@@ -206,6 +206,48 @@ def configure_routes(app:Flask):
             
         #POST for updating a company and creating a new one based on facade
         if request.method == 'POST':
+            #creating, administrator permissions
+            if isinstance(facade.user,AdministratorFacade):
+                try:
+                    # get data from the form
+                    airline_name = request.form.get('airline_name')
+                    country_id = request.form.get('country_id')
+                    username = request.form.get('username')
+                    password = request.form.get('password')
+                    email = request.form.get('email')
+                    new_user = Users(
+                        username = username,
+                        password = password,
+                        email = email,
+                        #all users created as customers, unless admin updates otherwise
+                        user_role = Role.FLIGHTCOMPANY
+                        
+                    )  
+                    # validation
+                    if not all([airline_name, country_id,username,password,email]):
+                        app.logger.error("Data provided incomplete, please refill the form")
+                        return render_template('create_airline.html', error='Data provided incomplete, please refill the form',action='create')
+                    repo = Repository(session=Session())
+                    userobj = repo.get_by_id(Users,new_user)
+                    if  userobj is None:
+                        facade.create_new_user(new_user)
+                        #internally fetching the customer from database to create a customer out of it's id & data
+                        new_airline_id = repo.get_all(Users)[-1].id
+
+                        # Logic to create a new customer instance and save it to the database...
+                        new_airline = AirlineCompanies(
+                            airline_name=airline_name,
+                            country_id=country_id,
+                            user_id = new_airline_id
+                        )
+                        facade.user.add_airline(new_airline)
+
+                        return render_template('create_airline.html',error='user created!',action='create')
+                    else:
+                        return render_template('create_airline.html',error='internal server error',action='create')
+                except Exception as e:
+                    app.logger.error(f"An error occurred: {str(e)}")
+                    return render_template('create_airline.html', error='Internal server error',action='create')
             #updating, airline permissions
             if isinstance(facade.user, AirlineFacade):
                 airline_name = request.form.get('airline_name')
@@ -252,48 +294,8 @@ def configure_routes(app:Flask):
                 
                 
                 return redirect(url_for('dashboard'))
-            #creating, administrator permissions
-            if isinstance(facade.user,AdministratorFacade):
-                try:
-                    # get data from the form
-                    airline_name = request.form.get('airline_name')
-                    country_id = request.form.get('country_id')
-                    username = request.form.get('username')
-                    password = request.form.get('password')
-                    email = request.form.get('email')
-                    new_user = Users(
-                        username = username,
-                        password = password,
-                        email = email,
-                        #all users created as customers, unless admin updates otherwise
-                        user_role = Role.FLIGHTCOMPANY
-                        
-                    )  
-                    # validation
-                    if not all([airline_name, country_id,username,password,email]):
-                        app.logger.error("Data provided incomplete, please refill the form")
-                        return render_template('create_airline.html', error='Data provided incomplete, please refill the form',action='create')
-                    repo = Repository(session=Session())
-                    userobj = repo.get_by_id(Users,new_user)
-                    if  userobj is None:
-                        facade.create_new_user(new_user)
-                        #internally fetching the customer from database to create a customer out of it's id & data
-                        new_airline_id = repo.get_all(Users)[-1].id
-
-                        # Logic to create a new customer instance and save it to the database...
-                        new_airline = AirlineCompanies(
-                            airline_name=airline_name,
-                            country_id=country_id,
-                            user_id = new_airline_id
-                        )
-                        facade.user.add_airline(new_airline)
-
-                        return render_template('create_airline.html',error='user created!',action='create')
-                    else:
-                        return render_template('create_airline.html',error='internal server error',action='create')
-                except Exception as e:
-                    app.logger.error(f"An error occurred: {str(e)}")
-                    return render_template('create_airline.html', error='Internal server error',action='create')
+            
+            
             else:
                 return '',404
     
@@ -336,10 +338,10 @@ def configure_routes(app:Flask):
                     if not all([origin_country_id, destination_country_id,departure_time,landing_time,remaining_tickets,airlineobj.id]):
                         app.logger.error("Data provided incomplete, please refill the form")
                         return render_template('create_flight.html', error='Data provided incomplete, please refill the form',action='create')
-                    dbflight = facade.user.add_flight(flight=new_flight).id
-                    #implemented return object, so we can pick the created id from the db, not sure if this is necessary during creation though, not done on the other class objects.
-                    
                     #internally fetching the customer from database to create a customer out of it's id & data
+                    dbflight = facade.user.add_flight(flight=new_flight).id
+                    #implemented return object, so we can pick the created id from the db, not sure if this is necessary during creation though, not done on the other class objects yet.
+                    
                     return render_template('create_flight.html',error='flight created!',action='create')
 
             except Exception as e:
@@ -394,6 +396,7 @@ def configure_routes(app:Flask):
     #route for making a new customer with a form        
     @app.route('/create_customer', methods=['GET','POST'])
     def create_customer():
+        print(request.values)
         if request.method == 'GET':
             try:
                 return render_template('create_customer.html', action='create')
@@ -447,11 +450,14 @@ def configure_routes(app:Flask):
                 return render_template('create_customer.html', error='Internal server error')
     
     #WIP, still needs object oriented magic
-    @app.route('/update_customer', methods=['GET','PUT'])
+    @app.route('/update_customer', methods=['GET','POST'])
     def update_customer():
+        print(request.values)
+        
         if (request.method == 'GET'):
             return render_template('/create_customer.html',action='update')
-        elif (request.method == 'PUT'):
+        elif (request.method == 'POST'):
+            repo = Repository(session=Session())
             first_name = request.form.get('first_name')
             last_name = request.form.get('last_name')
             address = request.form.get('address')
@@ -460,41 +466,22 @@ def configure_routes(app:Flask):
             username = request.form.get('username')
             password = request.form.get('password')
             email = request.form.get('email')
-            updated_user_data = Users(
-                username = username,
-                password = password,
-                email = email,
-                #all users created as customers, unless admin updates otherwise
-                user_role = Role.CUSTOMER
-                    
-                )
-            newobj = Repository(session=Session()).get_user_by_username(username=username).all()
-            updated_customer_data = Customers(
-                    first_name=first_name,
-                    last_name=last_name,
-                    address=address,
-                    phone_no=phone_no,
-                    credit_card_no=credit_card_no,
-                    user_id = facade.user.token.id
-                )
-    
-    #gets roles from the database, test presentation only
-    @app.route('/user_roles', methods=['GET'])
-    def roles():
-        session = Session()
-        repo = Repository(session)
-        user_roles = repo.get_all(UserRoles)
-        session.close()
-        return render_template('user_roles.html', user_roles=user_roles)
-
-    #test
-    @app.route('/prc_call', methods=['POST'])
-    def prc_test():
-        session = Session()
-        repo = Repository(session=session)
-        admin: Administrators = repo.get_by_id(Administrators,9)
-        admin.first_name = 'eli'
-        repo.update(admin)
-        return "",200
-
-
+            customer_data = repo.get_customer_by_username(facade.user.token.name)
+            customer = repo.get_by_id(Customers,customer_data.id)
+            user = repo.get_by_id(Users,customer_data.user_id)
+            print(customer_data.id,customer_data.user_id)
+            try:
+                
+                customer.first_name = first_name
+                customer.last_name = last_name
+                customer.address = address
+                customer.phone_no = phone_no
+                customer.credit_card_no = credit_card_no
+                user.username = username
+                user.password = password
+                user.email = email
+                facade.user.update_customer(user=user,customer=customer,repo=repo)
+                repo.session.close()
+                return render_template('create_customer.html',error ='Customer updated!',action='update')
+            except Exception as e:
+                return 'no'
