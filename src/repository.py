@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import text
+from sqlalchemy import text, Row,CursorResult
 import models
 from datetime import datetime
 from tools.logger import SingletonLogger
@@ -15,7 +15,7 @@ class Repository:
             case "info":self.logger.info(message)
             case "error":self.logger.error(message)
     
-    def log_and_execute(self, message:str, operation:str, query:str, params=None, crud_operation=None) :
+    def log_and_execute(self, message:str, operation:str, query:str, params=None, crud_operation=None) -> CursorResult:
         try:
             self.log(f"Executing {operation} - {message} - CRUD={crud_operation}",state='info')
             result = self.session.execute(text(query), params)
@@ -25,7 +25,7 @@ class Repository:
     #endregion    
 
     #region CRUD
-    def get_by_id(self, model: models, id: int)-> models.Administrators|models.Customers|models.Users|models.UserRoles:
+    def get_by_id(self, model: models, id: int)-> models.Administrators|models.Customers|models.Users|models.UserRoles|models.AirlineCompanies:
         try:
             query = self.session.query(model).filter_by(id=id)
             res:models = query.one_or_none()
@@ -59,13 +59,12 @@ class Repository:
         self.session.commit()
         self.log(f"Add {item.__class__.__name__} crud_operation='CREATE'",'info')
         
-    def update(self, obj:object) ->bool:
-            if obj is not None:
-                self.session.commit()
-                self.log(f'updated table {obj.__class__.__name__} with id:{obj.id} crud_operation="UPDATE"','info')
-                return True
-            else:
-                return False
+    def update(self, model:models=None) -> None:
+        print('attempting to commit')
+        self.session.commit()
+        if model:
+            self.log(f'updated table {model.__class__.__name__} with id:{model.id} crud_operation="UPDATE"','info')
+            return model
 
     def add_all(self, items: models):
         try:
@@ -92,14 +91,20 @@ class Repository:
     #needs uncluttering : log_and_execute, log    
     def get_airline_by_username(self, username: str) -> models.AirlineCompanies:
         query = "EXEC prc_get_airline_by_username @_username=:username"
+        
         result = self.log_and_execute("Get airline by username", "get_airline_by_username", query, {"username": username},crud_operation='READ')
-        data = result.one()
-        return data
+        try:
+            data = result.one()
+            return data
+        except Exception as e:
+            return None
 
     def get_customer_by_username(self, username: str) -> models.Customers:
         query = "EXEC prc_get_customer_by_username @_username=:username"
         result = self.log_and_execute("Get customer by username", "get_customer_by_username", query, {"username": username},crud_operation='READ')
         data = result.one()
+
+        
         return data
 
     def get_user_by_username(self, username: str) -> models.Users:

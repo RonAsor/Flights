@@ -74,7 +74,7 @@ go
 ALTER PROCEDURE prc_get_airline_by_username @_username varchar(255)
 as
 	begin
-		select ac.* from Users u join Airline_Companies ac on u.id=ac.User_Id where u.Username = @_username
+		select u.*,ac.* from Users u join Airline_Companies ac on u.id=ac.User_Id where u.Username = @_username
 	end
 go
 
@@ -137,8 +137,9 @@ go
 
 begin
 select * from Countries
-select * from Airline_Companies
+
 select * from Flights
+select * from Airline_Companies 
 select * from Users
 select * from User_Roles
 select * from Customers
@@ -149,13 +150,13 @@ end
 go
 
 ---test for recent time
-insert into Flights values (9,1,1,'2024-01-19 00:00:00','2024-01-19 02:00:00',5)
+insert into Flights values (13,1,1,'2024-01-19 00:00:00','2024-01-19 02:00:00',5)
 insert into Administrators values ('ron','asor',89)
 --order of deletions
 delete from Tickets
 delete from Customers
 delete from Administrators
-delete from Users 
+delete from Users where id=100
 delete from Airline_Companies 
 delete from Flights
 
@@ -163,11 +164,11 @@ insert into Administrators values ('eli','israeli',5)
 
 insert into Users values ('pom','pom','jkl@gmail.com',1)
 insert into Countries values ('Israel','')
-insert into Airline_Companies values ('chakair',1,2) --using int as ids
+insert into Airline_Companies values ('chakair',1,92) --using int as ids
 insert into Customers values ('Ron','Asor','m.h','028502375','5598293','2')
 insert into Flights values (3,1,1,'2023-05-05 00:00:00','2023-08-05 00:00:00',5)
 insert into Tickets values (2,26)
-exec prc_get_airline_by_username 'stration'
+exec prc_get_airline_by_username 'Chakaroni'
 exec prc_get_customer_by_username 'ronasor'
 exec prc_get_arrival_flights 1
 exec prc_get_departure_flights 1

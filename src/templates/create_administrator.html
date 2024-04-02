@@ -7,30 +7,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create administrator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
-    <h2>Create new administrator</h2>
-    {% if error %}
-    <p>{{ error }}</p>
-    {% endif %}
-    <form action="/create_administrator" method="POST">
+    <div>
+        <h2>Create new administrator</h2>
+        {% if error %}
+        <p>{{ error }}</p>
+        {% endif %}
+        <form action="/create_administrator" method="POST">
 
-        <label for="first_name">First Name:</label><br>
-        <input type="text" required id="first_name" name="first_name"><br>
-        <label for="last_name">Last Name:</label><br>
-        <input type="text" id="last_name" name="last_name"><br>
-        <label for="username">Username:</label><br>
-        <input type="text" required id="username" name="username"><br>
-        <label for="password">Password:</label><br>
-        <input type="text" required id="password" name="password"><br>
-        <label for="email">Email:</label><br>
-        <input type="text" required id="email" name="email"><br><br>
-        <input type="submit" value="Submit">
-    </form>
-    <button style="margin-top: 70px;  " onclick="window.history.back()">
-        Return to previous page
-    </button>
+            <label for="first_name">First Name:</label><br>
+            <input type="text" required id="first_name" name="first_name"><br>
+            <label for="last_name">Last Name:</label><br>
+            <input type="text" id="last_name" name="last_name"><br>
+            <label for="username">Username:</label><br>
+            <input type="text" required id="username" name="username"><br>
+            <label for="password">Password:</label><br>
+            <input type="text" required id="password" name="password"><br>
+            <label for="email">Email:</label><br>
+            <input type="text" required id="email" name="email"><br><br>
+            <input type="submit" value="Submit">
+        </form>
+        <button style="margin-top: 70px;  " onclick="window.history.back()">
+            Return to previous page
+        </button>
 </body>
+</div>
 
 </html>

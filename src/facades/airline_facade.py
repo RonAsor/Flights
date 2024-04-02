@@ -16,23 +16,28 @@ class AirlineFacade(FacadesBase):
         repo = Repository(session=Session())
         flights:list[Flights] = repo.get_all(Flights,airline_company_id=id)
         return flights
-        #tickets:list[Tickets] = repo.get_all(Tickets,{"customer_id":airlines[0].id})
-        #if len(airlines) == 1:
-        #    return tickets
         
-        repo.log(f'error: found {len(airlines)} instead of 1','error')
+    #commit airline and user changes if any provided
+    def update_airline(self,airline:AirlineCompanies,user:Users,repo:Repository=None):
+        try:
+            if not repo:
+                repo = Repository(session=Session())
+                repo.log(f'Commiting : {airline} with id: {airline.id}, and {user} with {user.id}','info')
+                repo.update()
+                repo.session.close()
+                return True
+            if repo:
+                repo.log(f'Commiting : {airline.__tablename__} with id: {airline.id}, and {user.__tablename__} with {user.id}','info')
+                repo.update()
+                repo.session.close()
+                return True
+
+        except Exception as e:
+            repo.log(f'FAILED Commiting : {airline.__tablename__} with id: {airline.id}, and {user.__tablename__} with {user.id}, with error code {e}','error')
+            return False
         
     
-    #check what the update methods do, should update the existing values with values changed by the user and COMMIT them at the end. currently unsupported
-    def update_airline(self,airline: AirlineCompanies,user:Users):
-        repo = Repository(session=Session())
-        repo.update(airline)
-        repo.update(user)
-        repo.session.close()
-        
-        
-    
-    #adds a flight to the database, working, should check criterias for the IF statement
+    #adds a flight to the database, working, should check conditional criterias for the IF statement
     def add_flight(self,flight: Flights) -> Flights:
         repo = Repository(session=Session())
         if int(flight.remaining_tickets) > 0 and flight.landing_time>flight.departure_time: #and flight.origin_country_id != flight.destination_country_id:
@@ -45,7 +50,7 @@ class AirlineFacade(FacadesBase):
             repo.session.close()
             return 'Cannot add flight with ticket amount less or equal to 0'
         
-    #check what update does here too, gets flight information and updates it with session.commit from repo.update        
+    #check what update does here too, gets flight information and updates it with session.commit from repo.update. still needs work       
     def update_flight(self,flight: Flights,**kwargs):
         repo = Repository(session=Session())
         res: Flights = repo.get_by_id(Flights,flight.airline_company_id)

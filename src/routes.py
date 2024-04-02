@@ -5,7 +5,7 @@ from flask import render_template,jsonify,request,Flask,redirect,url_for
 from models import Administrators,AirlineCompanies,Countries,Customers,Tickets,UserRoles,Users,Flights
 from database import Session
 from repository import Repository
-from sqlalchemy import CursorResult
+from sqlalchemy import CursorResult,Row
 from facades.anonymous_facade import AnonymousFacade, Role
 from facades.tokens import LoginToken
 from facades.administrator_facade import AdministratorFacade
@@ -20,6 +20,8 @@ def configure_routes(app:Flask):
     #index '/' page reroutes to login
     @app.route('/',methods = ['GET'])
     def index():
+        if facade.user:
+            return redirect(url_for('dashboard'))
         return redirect(url_for('show_flight_tracker'))
     
      #login, basically the first page we get when we log into the website
@@ -86,19 +88,21 @@ def configure_routes(app:Flask):
                 flight_list = facade.user.get_all_flights()
                 repo.session.close()
                 return render_template('flight_tracker.html',flights=flight_list,login=facade.user,customer=customer)
+        
         elif isinstance(facade.user,AirlineFacade):
-        
-        
             if facade.user:
                 #if accessing flight_tracker
                 if not request.args.get('action') == 'show_my_flights':
                     repo = Repository(session=Session())
                     #gets user by token, then get the airline
                     user = repo.get_by_id(Users,facade.user.token.id)
-                    airline = repo.get_user_by_username(username=user.username)
-                    flight_list = facade.user.get_all_flights()
+                    airline = repo.get_airline_by_username(username=user.username)
                     repo.session.close()
-                    return render_template('flight_tracker.html',flights=flight_list,login=facade.user,airline=airline)
+                    if airline is not None:
+                        flight_list = facade.user.get_all_flights()
+                        return render_template('flight_tracker.html',flights=flight_list,login=facade.user,airline=airline)
+                    elif airline is None:
+                        return redirect(url_for('index'))
                 
                 #if accessed through airline dashboard to show my flights
                 repo = Repository(session=Session())
@@ -107,6 +111,7 @@ def configure_routes(app:Flask):
                 my_flight_list = facade.user.get_my_flights(repo.get_airline_by_username(airline.username).id)
                 repo.session.close()
                 return render_template('flight_tracker.html',flights=my_flight_list,login=facade.user,airline=airline,actions='ALelevated')
+            
         elif isinstance(facade.user,AdministratorFacade):
             if facade.user:
                 repo = Repository(session=Session())
@@ -115,9 +120,11 @@ def configure_routes(app:Flask):
                 flight_list = facade.user.get_all_flights()
                 repo.session.close()
                 return render_template('flight_tracker.html',flights=flight_list,login=facade.user,admin=admin)
+            
         elif isinstance(facade,AnonymousFacade):
             flight_list = facade.get_all_flights()
             return render_template('flight_tracker.html',flights=flight_list,login=facade.user)
+        
         return render_template('flight_tracker.html',flights=flight_list,login=facade.user)
     
     #admin route for showing the airlines table
@@ -197,8 +204,9 @@ def configure_routes(app:Flask):
             except Exception as e:
                 pass
             
-        #POST for updating a company
+        #POST for updating a company and creating a new one based on facade
         if request.method == 'POST':
+            #updating, airline permissions
             if isinstance(facade.user, AirlineFacade):
                 airline_name = request.form.get('airline_name')
                 country_id = request.form.get('country_id')
@@ -206,31 +214,45 @@ def configure_routes(app:Flask):
                 password = request.form.get('password')
                 email = request.form.get('email')
                 
-                repo = Repository(session=Session())
+                try:
+                    # Begin a transaction
+                    session = Session()
+                    repo = Repository(session=session)
+                    
+                    # Fetch user object
+                    user = repo.get_by_id(Users, facade.user.token.id)
+                    
+                    # Fetch airline object
+                    airlineuser = repo.get_airline_by_username(user.username)
+                    #returns obj with all table columns of both user and airline, id belong to airline in this case
+                    airline = repo.get_by_id(AirlineCompanies, airlineuser.id)
+                    #returns the company object from the airline id
+                    
+                    # Update airline attributes
+                    airline.airline_name = airline_name
+                    airline.country_id = country_id
+                    
+                    # Update user attributes
+                    user.username = username
+                    user.password = password
+                    user.email = email
+                    user.user_role = 2
+                    
+                    # Commit changes to both objects within the same transaction
+                    facade.user.update_airline(airline,user,repo=repo)
+                    
+                    # Close the session
+                    session.close()
+                    
+                    return redirect(url_for('dashboard'))
+                except Exception as e:
+                    # Roll back the transaction in case of error
+                    session.rollback()
+                    raise e
                 
-                # Fetch user object
-                user = repo.get_by_id(Users, facade.user.token.id)
                 
-                # Fetch airline object
-                airline = repo.get_airline_by_username(user.username)
-                airline = AirlineCompanies(id=airline.id, airline_name=airline.airline_name, country_id=airline.country_id, user_id=airline.user_id)
-                
-                # Update airline attributes
-                airline.airline_name = airline_name
-                airline.country_id = country_id
-                
-                # Commit airline changes
-                repo.update(airline)
-                
-                # Update user attributes
-                user.username = username
-                user.password = password
-                user.email = email
-                user.user_role = 2
-                
-                # Commit user changes
-                repo.update(user)
                 return redirect(url_for('dashboard'))
+            #creating, administrator permissions
             if isinstance(facade.user,AdministratorFacade):
                 try:
                     # get data from the form
@@ -251,28 +273,31 @@ def configure_routes(app:Flask):
                     if not all([airline_name, country_id,username,password,email]):
                         app.logger.error("Data provided incomplete, please refill the form")
                         return render_template('create_airline.html', error='Data provided incomplete, please refill the form',action='create')
-                    
-                    facade.create_new_user(new_user)
                     repo = Repository(session=Session())
-                    #internally fetching the customer from database to create a customer out of it's id & data
-                    new_airline_id = repo.get_all(Users)[-1].id
+                    userobj = repo.get_by_id(Users,new_user)
+                    if  userobj is None:
+                        facade.create_new_user(new_user)
+                        #internally fetching the customer from database to create a customer out of it's id & data
+                        new_airline_id = repo.get_all(Users)[-1].id
 
-                    # Logic to create a new customer instance and save it to the database...
-                    new_airline = AirlineCompanies(
-                        airline_name=airline_name,
-                        country_id=country_id,
-                        user_id = new_airline_id
-                    )
-                    facade.user.add_airline(new_airline)
+                        # Logic to create a new customer instance and save it to the database...
+                        new_airline = AirlineCompanies(
+                            airline_name=airline_name,
+                            country_id=country_id,
+                            user_id = new_airline_id
+                        )
+                        facade.user.add_airline(new_airline)
 
-                    return render_template('create_airline.html',error='user created!',action='create')
-
+                        return render_template('create_airline.html',error='user created!',action='create')
+                    else:
+                        return render_template('create_airline.html',error='internal server error',action='create')
                 except Exception as e:
                     app.logger.error(f"An error occurred: {str(e)}")
                     return render_template('create_airline.html', error='Internal server error',action='create')
             else:
                 return '',404
-        #route for making a new airline with a form        
+    
+    #route for making a new flight with a form        
     @app.route('/create_flight', methods=['GET','POST'])
     def create_flight():
         if request.method == 'GET':
@@ -286,7 +311,6 @@ def configure_routes(app:Flask):
         if request.method == 'POST':
             try:
                 if isinstance(facade.user,AirlineFacade):
-                    print(request.form)
                     # get data from the form
                     repo = Repository(session=Session())
                     airlineobj = repo.get_airline_by_username(repo.get_by_id(Users,facade.user.token.id).username)
@@ -326,7 +350,6 @@ def configure_routes(app:Flask):
     @app.route('/customers/<int:customer_id>', methods=['DELETE'])
     def delete_customer(customer_id):
         if isinstance(facade.user,AdministratorFacade):
-            print(customer_id)
             try:
                 Repository(session=Session()).remove(Customers,customer_id)
                 return 'Customer deleted', 200
@@ -337,7 +360,6 @@ def configure_routes(app:Flask):
     @app.route('/admins/<int:admin_id>', methods=['DELETE'])
     def delete_admin(admin_id):
         if isinstance(facade.user,AdministratorFacade):
-            print(admin_id)
             try:
                 Repository(session=Session()).remove(Administrators,admin_id)
                 return 'Admin deleted', 200
@@ -348,7 +370,6 @@ def configure_routes(app:Flask):
     @app.route('/airlines/<int:airline_id>', methods=['DELETE'])
     def delete_airline(airline_id):
         if isinstance(facade.user,AdministratorFacade):
-            print(airline_id)
             try:
                 Repository(session=Session()).remove(AirlineCompanies,airline_id)
                 return 'Airline deleted', 200
@@ -359,7 +380,6 @@ def configure_routes(app:Flask):
     @app.route('/flights/<int:flight_id>', methods=['DELETE'])
     def delete_flight(flight_id):
         if isinstance(facade.user,(AdministratorFacade,AirlineFacade)):
-            print(flight_id)
             try:
                 Repository(session=Session()).remove(Flights,flight_id)
                 return 'Airline deleted', 200
@@ -381,7 +401,6 @@ def configure_routes(app:Flask):
                 pass
         if request.method == 'POST':
             try:
-                print(request.form)
                 # get data from the form
                 first_name = request.form.get('first_name')
                 last_name = request.form.get('last_name')
@@ -410,7 +429,6 @@ def configure_routes(app:Flask):
                 repo = Repository(session=Session())
                 #internally fetching the customer from database to create a customer out of it's id & data
                 new_customer_id = repo.get_all(Users)[-1].id
-                print('new_customer_id:',new_customer_id,'\n')
 
                 # Logic to create a new customer instance and save it to the database...
                 new_customer = Customers(
@@ -479,5 +497,4 @@ def configure_routes(app:Flask):
         repo.update(admin)
         return "",200
 
-    if __name__ == '__main__':
-        app.run(debug=True)
+

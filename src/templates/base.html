@@ -5,12 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    {%block head%}
-    <ul>
-        <li>
-            <a href="airlines">show airlines</a>
-        </li>
-    </ul>
+    {%block component%}
+    <div id="flightTrackerContainer"></div>
+    <script>
+
+        function loadFlightTracker() {
+            // Send an AJAX request to the '/show_flight_tracker' route
+            fetch('/dasahboard')
+                .then(response => response.text())
+                .then(data => {
+                    // Insert the received HTML content into the container
+                    document.getElementById('flightTrackerContainer').innerHTML = data;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Call the function to load the content when the page loads
+        window.addEventListener('load', loadFlightTracker);
+    </script>
     {%endblock%}
 </head>
 

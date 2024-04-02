@@ -11,35 +11,37 @@
 </head>
 
 <body>
-    <h1>Airline list</h1>
-    <table id="airline-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Airline Name</th>
-                <th>Country Id</th>
-                <th>User ID</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for airline in airlines %}
-            <tr>
-                <td>{{ airline.id }}</td>
-                <td>{{ airline.airline_name }}</td>
-                <td>{{ airline.country_id }}</td>
-                <td>{{ airline.user_id }}</td>
-                <td>
-                    <button class="remove-airline-btn" data-airline-id="{{ airline.id }}">Remove
-                    </button>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <button style="margin-top: 70px;  " onclick="window.history.back()">
-        Return to previous page
-    </button>
+    <div>
+        <h1>Airline list</h1>
+        <table id="airline-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Airline Name</th>
+                    <th>Country Id</th>
+                    <th>User ID</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for airline in airlines %}
+                <tr>
+                    <td>{{ airline.id }}</td>
+                    <td>{{ airline.airline_name }}</td>
+                    <td>{{ airline.country_id }}</td>
+                    <td>{{ airline.user_id }}</td>
+                    <td>
+                        <button class="remove-airline-btn" data-airline-id="{{ airline.id }}">Remove
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button style="margin-top: 70px;  " onclick="window.history.back()">
+            Return to previous page
+        </button>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

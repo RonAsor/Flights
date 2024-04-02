@@ -1,6 +1,7 @@
 <!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,23 +9,27 @@
     <title>User Roles</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
-    <h1>User Roles</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Role Name</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for role in user_roles %}
-            <tr>
-                <td>{{ role.id }}</td>
-                <td>{{ role.role_name }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div>
+        <h1>User Roles</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Role Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for role in user_roles %}
+                <tr>
+                    <td>{{ role.id }}</td>
+                    <td>{{ role.role_name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
+
 </html>
