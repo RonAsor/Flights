@@ -51,14 +51,13 @@ class AirlineFacade(FacadesBase):
             return 'Cannot add flight with ticket amount less or equal to 0'
         
     #check what update does here too, gets flight information and updates it with session.commit from repo.update. still needs work       
-    def update_flight(self,flight: Flights,**kwargs):
-        repo = Repository(session=Session())
-        res: Flights = repo.get_by_id(Flights,flight.airline_company_id)
-        if self.token.id == res.airline_company_id:
+    def update_flight(self,flight: Flights,repo:Repository=None):
+        if not repo:
+            repo = Repository(session=Session())
             repo.update(flight)
             repo.session.close()
-
-        
+        repo.update(flight)
+            
     def remove_flight(self,flight: Flights.id):
         repo = Repository(session=Session())
         repo.remove(Flights,flight)

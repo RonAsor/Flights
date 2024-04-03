@@ -25,7 +25,7 @@ class Repository:
     #endregion    
 
     #region CRUD
-    def get_by_id(self, model: models, id: int)-> models.Administrators|models.Customers|models.Users|models.UserRoles|models.AirlineCompanies:
+    def get_by_id(self, model: models, id: int)-> models.Administrators|models.Customers|models.Users|models.UserRoles|models.AirlineCompanies|models.Flights:
         try:
             query = self.session.query(model).filter_by(id=id)
             res:models = query.one_or_none()

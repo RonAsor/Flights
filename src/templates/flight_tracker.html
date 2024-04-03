@@ -48,7 +48,10 @@
                     <td>{{ flight.landing_time }}</td>
                     <td>{{ flight.remaining_tickets }}</td>
                     {%if actions=='ALelevated'%}
-                    <td><button class=" remove-flight-btn" data-flight-id="{{ flight.id }}">Remove</button></td>
+                    <td><button class="remove-flight-btn" data-flight-id="{{ flight.id }}">Remove</button>
+                        <button class="update-flight-btn" data-flight-id="{{ flight.id }}">Update</button>
+
+                    </td>
                     {%endif%}
                 </tr>
                 {% endfor %}
@@ -62,9 +65,6 @@
     {%endblock%}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-
-
-
             var removeButtons = document.querySelectorAll('.remove-flight-btn');
             removeButtons.forEach(function (button) {
                 button.addEventListener('click', function () {
@@ -92,6 +92,15 @@
             });
         }
         );
+        document.addEventListener('DOMContentLoaded', function () {
+            var updateButtons = document.querySelectorAll('.update-flight-btn');
+            updateButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var flightId = button.getAttribute('data-flight-id');
+                    window.location.href = "/update_flight?flight_id=" + flightId;
+                });
+            });
+        });
     </script>
 </body>
 

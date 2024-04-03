@@ -6,33 +6,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create flight</title>
+    <title>Create new flight</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
     <div>
+        {%if action=='create'%}
         <h2>Create new flight</h2>
         {% if error %}
         <p>{{ error }}</p>
         {% endif %}
         <form action="/create_flight" method="POST">
 
-            <label for="origin_country_id">Origin Country Code:</label><br>
+            <label for="origin_country_id">Origin country (id):</label><br>
             <input type="text" required id="origin_country_id" name="origin_country_id"><br>
-            <label for="destination_country_id">destination_country_id</label><br>
+            <label for="destination_country_id">Destination country (id):</label><br>
             <input type="text" id="destination_country_id" name="destination_country_id"><br>
-            <label for="departure_time">departure_time:</label><br>
-            <input type="text" required id="departure_time" name="departure_time"><br>
-            <label for="landing_time">landing_time:</label><br>
-            <input type="text" required id="landing_time" name="landing_time"><br>
-            <label for="remaining_tickets">remaining_tickets</label><br>
-            <input type="text" required id="remaining_tickets" name="remaining_tickets"><br><br>
+            <label for="departure_time">Departure date:</label><br>
+            <input type="text" id="departure_time" name="departure_time"><br>
+            <label for="landing_time">Landing date:</label><br>
+            <input type="text" id="landing_time" name="landing_time"><br>
+            <label for="remaining_tickets">Remaining tickets:</label><br>
+            <input type="text" id="remaining_tickets" name="remaining_tickets"><br>
             <input type="submit" value="Submit">
         </form>
         <button style="margin-top: 70px;  " onclick="window.history.back()">
             Return to previous page
         </button>
+        {%endif%}
+        {%if action=='update'%}
+        <h2>Update customer entry:</h2>
+        {% if error %}
+        <p>{{ error }}</p>
+        {% endif %}
+        <form action="/update_flight" method="POST">
+            For flight entry:
+            <input style="width: 100px; text-align: center;" type="text" id="flight_id" name="flight_id"
+                value="{{flight_id}}" readonly><br>
+            <label for="origin_country_id">Origin country (id):</label><br>
+            <input type="text" required id="origin_country_id" name="origin_country_id"><br>
+            <label for="destination_country_id">Destination country (id):</label><br>
+            <input type="text" id="destination_country_id" name="destination_country_id"><br>
+            <label for="departure_time">Departure date:</label><br>
+            <input type="text" id="departure_time" name="departure_time"><br>
+            <label for="landing_time">Landing date:</label><br>
+            <input type="text" id="landing_time" name="landing_time"><br>
+            <label for="remaining_tickets">Remaining tickets:</label><br>
+            <input type="text" id="remaining_tickets" name="remaining_tickets"><br>
+            <input type="submit" value="Update">
+        </form>
+        <button style="margin-top: 70px;  " onclick="window.history.back()">
+            Return to previous page
+        </button>
+
+        {%endif%}
     </div>
 </body>
 

@@ -449,7 +449,7 @@ def configure_routes(app:Flask):
                 app.logger.error(f"An error occurred: {str(e)}")
                 return render_template('create_customer.html', error='Internal server error')
     
-    #WIP, still needs object oriented magic
+    
     @app.route('/update_customer', methods=['GET','POST'])
     def update_customer():
         print(request.values)
@@ -485,3 +485,36 @@ def configure_routes(app:Flask):
                 return render_template('create_customer.html',error ='Customer updated!',action='update')
             except Exception as e:
                 return 'no'
+            
+    @app.route('/update_flight', methods=['GET','POST'])
+    def update_flight():
+        print(request.get_data())
+        if (request.method == 'GET'):
+            return render_template('/create_flight.html',action='update',flight_id=request.values.get('flight_id'))
+        elif (request.method == 'POST'):
+            repo = Repository(session=Session())
+            origin_country_id = request.form.get('origin_country_id')
+            destination_country_id = request.form.get('destination_country_id')
+            departure_time = request.form.get('departure_time')
+            landing_time = request.form.get('landing_time')
+            remaining_tickets = request.form.get('remaining_tickets')
+            flight_id = request.form.get('flight_id')
+            print(flight_id)
+            flight = repo.get_by_id(Flights,flight_id)
+            print(flight)
+            airline = repo.get_by_id(AirlineCompanies,flight.airline_company_id)
+            print(airline)
+            try:
+                if airline.user_id == facade.user.token.id:
+                    flight.origin_country_id = origin_country_id
+                    flight.destination_country_id = destination_country_id
+                    flight.departure_time = departure_time
+                    flight.landing_time = landing_time
+                    flight.remaining_tickets = remaining_tickets
+                    facade.user.update_flight(flight=flight,repo=repo)
+                    repo.session.close()
+                    return render_template('create_flight.html',error ='Flight updated!',action='update')
+                else:
+                    return render_template('create_flight.html',error ='Error encountered, cannot edit this flight',action='update')
+            except Exception as e:
+                return print(e)

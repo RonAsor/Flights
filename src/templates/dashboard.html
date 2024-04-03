@@ -43,7 +43,6 @@
                     onselect="javascript:fetch('/create_airline?action=update')">Update airline entry
                 </option>
                 <option value="{{ url_for('create_flight') }}">Add flight</option>
-                <option value="12">Update flight entry</option>
             </select>
             {%endif%}
             {% if user.role == 'Customer' %}
@@ -95,19 +94,9 @@
                 switch (option) {
                     default:
                         break;
-                    case "12":
-                        console.log("Update flight entry");
-                        break;
-
-                    case "13":
-                        console.log("Remove flight");
-                        break;
-
                     //Customer actions:
 
-                    case "14":
-                        console.log("Update customer data");
-                        break;
+                    //should be in customer flights page
                     case "15":
                         console.log("Vouch for tickets");
                         break;
