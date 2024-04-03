@@ -4,7 +4,11 @@ from models import *
 from facades.tokens import LoginToken
 from facades.anonymous_facade import FacadesBase
 class AirlineFacade(FacadesBase):
-    pass
+    '''
+    Date: 03/04/24
+    Author: Ron Asor
+    Description: Class to handle an Airline object user's available actions
+    '''
     
     
     def __init__(self,token: LoginToken):

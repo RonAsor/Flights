@@ -15,6 +15,11 @@ from facades.airline_facade import AirlineFacade
 facade = AnonymousFacade()
 
 def configure_routes(app:Flask):
+    '''
+    Date: 03/04/24
+    Author: Ron Asor
+    Description: all routes will be handled from here. in order to keep other files clean and organized
+    '''
     
     
     #index '/' page reroutes to login
@@ -87,7 +92,7 @@ def configure_routes(app:Flask):
                 customer = repo.get_user_by_username(username=user.username)
                 flight_list = facade.user.get_all_flights()
                 repo.session.close()
-                return render_template('flight_tracker.html',flights=flight_list,login=facade.user,customer=customer)
+                return render_template('flight_tracker.html',flights=flight_list,login=facade.user,customer=customer,actions='CUelevated')
         
         elif isinstance(facade.user,AirlineFacade):
             if facade.user:
@@ -136,7 +141,7 @@ def configure_routes(app:Flask):
     
         
         return 'invalid'
-    
+     
     #route for making a new admin with a form        
     @app.route('/create_administrator', methods=['GET','POST'])
     def create_administrator():
@@ -299,55 +304,7 @@ def configure_routes(app:Flask):
             else:
                 return '',404
     
-    #route for making a new flight with a form        
-    @app.route('/create_flight', methods=['GET','POST'])
-    def create_flight():
-        if request.method == 'GET':
-            try:
-                if isinstance(facade.user,AirlineFacade):
-                    return render_template('create_flight.html', action='create')
-                else:
-                    return '',404
-            except Exception as e:
-                pass
-        if request.method == 'POST':
-            try:
-                if isinstance(facade.user,AirlineFacade):
-                    # get data from the form
-                    repo = Repository(session=Session())
-                    airlineobj = repo.get_airline_by_username(repo.get_by_id(Users,facade.user.token.id).username)
-                    
-                    
-                    origin_country_id = request.form.get('origin_country_id')
-                    destination_country_id = request.form.get('destination_country_id')
-                    departure_time = request.form.get('departure_time')
-                    landing_time = request.form.get('landing_time')
-                    remaining_tickets = request.form.get('remaining_tickets')
-                    airline_company_id=airlineobj.id
-                    
-                    new_flight = Flights(
-                        airline_company_id=airline_company_id,
-                        origin_country_id=origin_country_id,
-                        destination_country_id=destination_country_id,
-                        departure_time = departure_time,
-                        landing_time = landing_time,
-                        remaining_tickets = remaining_tickets,
-                    )  
-                    
-                    # validation
-                    if not all([origin_country_id, destination_country_id,departure_time,landing_time,remaining_tickets,airlineobj.id]):
-                        app.logger.error("Data provided incomplete, please refill the form")
-                        return render_template('create_flight.html', error='Data provided incomplete, please refill the form',action='create')
-                    #internally fetching the customer from database to create a customer out of it's id & data
-                    dbflight = facade.user.add_flight(flight=new_flight).id
-                    #implemented return object, so we can pick the created id from the db, not sure if this is necessary during creation though, not done on the other class objects yet.
-                    
-                    return render_template('create_flight.html',error='flight created!',action='create')
-
-            except Exception as e:
-                app.logger.error(f"An error occurred: {str(e)}")
-                return render_template('create_flight.html', error='Internal server error',action='create')
-        
+    
     #route for deleting customer from the table, database
     @app.route('/customers/<int:customer_id>', methods=['DELETE'])
     def delete_customer(customer_id):
@@ -387,11 +344,6 @@ def configure_routes(app:Flask):
                 return 'Airline deleted', 200
             except:
                 return 'Airline not found', 404
-
-
-
-    ### End of Administrator privileges ###
-    #endregion
 
     #route for making a new customer with a form        
     @app.route('/create_customer', methods=['GET','POST'])
@@ -449,6 +401,57 @@ def configure_routes(app:Flask):
                 app.logger.error(f"An error occurred: {str(e)}")
                 return render_template('create_customer.html', error='Internal server error')
     
+    ### End of Administrator privileges ###
+    #endregion
+
+    #route for making a new flight with a form, for as airlinefacade        
+    @app.route('/create_flight', methods=['GET','POST'])
+    def create_flight():
+        if request.method == 'GET':
+            try:
+                if isinstance(facade.user,AirlineFacade):
+                    return render_template('create_flight.html', action='create')
+                else:
+                    return '',404
+            except Exception as e:
+                pass
+        if request.method == 'POST':
+            try:
+                if isinstance(facade.user,AirlineFacade):
+                    # get data from the form
+                    repo = Repository(session=Session())
+                    airlineobj = repo.get_airline_by_username(repo.get_by_id(Users,facade.user.token.id).username)
+                    
+                    
+                    origin_country_id = request.form.get('origin_country_id')
+                    destination_country_id = request.form.get('destination_country_id')
+                    departure_time = request.form.get('departure_time')
+                    landing_time = request.form.get('landing_time')
+                    remaining_tickets = request.form.get('remaining_tickets')
+                    airline_company_id=airlineobj.id
+                    
+                    new_flight = Flights(
+                        airline_company_id=airline_company_id,
+                        origin_country_id=origin_country_id,
+                        destination_country_id=destination_country_id,
+                        departure_time = departure_time,
+                        landing_time = landing_time,
+                        remaining_tickets = remaining_tickets,
+                    )  
+                    
+                    # validation
+                    if not all([origin_country_id, destination_country_id,departure_time,landing_time,remaining_tickets,airlineobj.id]):
+                        app.logger.error("Data provided incomplete, please refill the form")
+                        return render_template('create_flight.html', error='Data provided incomplete, please refill the form',action='create')
+                    #internally fetching the customer from database to create a customer out of it's id & data
+                    dbflight = facade.user.add_flight(flight=new_flight).id
+                    #implemented return object, so we can pick the created id from the db, not sure if this is necessary during creation though, not done on the other class objects yet.
+                    
+                    return render_template('create_flight.html',error='flight created!',action='create')
+
+            except Exception as e:
+                app.logger.error(f"An error occurred: {str(e)}")
+                return render_template('create_flight.html', error='Internal server error',action='create')
     
     @app.route('/update_customer', methods=['GET','POST'])
     def update_customer():
@@ -484,13 +487,16 @@ def configure_routes(app:Flask):
                 repo.session.close()
                 return render_template('create_customer.html',error ='Customer updated!',action='update')
             except Exception as e:
-                return 'no'
+                return render_template('create_customer.html',error ='An error has occured',action='update')
             
     @app.route('/update_flight', methods=['GET','POST'])
     def update_flight():
         print(request.get_data())
         if (request.method == 'GET'):
-            return render_template('/create_flight.html',action='update',flight_id=request.values.get('flight_id'))
+            if isinstance(facade.user,AirlineFacade):
+                return render_template('/create_flight.html',action='update',flight_id=request.values.get('flight_id'))
+            return redirect(url_for('dashboard'))
+            
         elif (request.method == 'POST'):
             repo = Repository(session=Session())
             origin_country_id = request.form.get('origin_country_id')
@@ -518,3 +524,26 @@ def configure_routes(app:Flask):
                     return render_template('create_flight.html',error ='Error encountered, cannot edit this flight',action='update')
             except Exception as e:
                 return print(e)
+    
+    @app.route('/buy_ticket', methods=['GET','POST'])
+    def buy_ticket():
+        print(request.method)
+        if request.method == "GET":
+            if isinstance(facade.user,CustomerFacade):
+                facade.user.get_my_tickets()
+                return redirect(url_for('dashboard',user=facade.user))
+            return redirect(url_for('dashboard'))
+            
+        elif request.method == 'POST':
+            pass
+            
+            
+    
+'''
+TDL:
+Guest & base controls for everyone,
+Customer controls,
+Logout button,
+
+
+'''

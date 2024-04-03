@@ -5,6 +5,11 @@ from facades.tokens import LoginToken
 from facades.anonymous_facade import FacadesBase
 
 class CustomerFacade(FacadesBase):
+    '''
+    Date: 03/04/24
+    Author: Ron Asor
+    Description: Class to handle a Customer object user's available actions
+    '''
     
     def __init__(self,token: LoginToken):
         super().__init__()
@@ -39,12 +44,14 @@ class CustomerFacade(FacadesBase):
         repo.remove(ticket)
         repo.session.close()
         
-    def get_my_tickets(self):
+    def get_my_tickets(self) -> Tickets|None:
         repo = Repository(session=Session())
-        customers:list[Customers] = repo.get_all(Customers,{"user_id":self.token.id})
-        if len(customers) == 1:
+        customer = repo.get_customer_by_username(self.token.name)
+        if len(customer) == 1:
+            customer_flights = repo.get_all(Tickets,{'customer_id':customer.id})
             repo.session.close()
-            return repo.get_all(Tickets,{"user_id":customers[0].id})
+            return customer_flights
         
-        repo.log(f'error: found {len(customers)} Customers instead of 1 on Customerfacade.get_my_tickets')
+        repo.log(f'error: found {len(customer)} Customers instead of 1 on Customerfacade.get_my_tickets',state='error')
         repo.session.close()
+        return None

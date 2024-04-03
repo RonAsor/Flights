@@ -49,7 +49,6 @@
             <select name="action" id="actionSelect" onchange="selectOption(this.value)">
                 <option>Action:</option>
                 <option value="{{ url_for('update_customer') }}">Update customer data</option>
-                <option value="15">Vouch for tickets</option>
                 <option value="16">Cancel ticket vouchers</option>
                 <option value="17">Show my tickets</option>
             </select>
@@ -97,9 +96,6 @@
                     //Customer actions:
 
                     //should be in customer flights page
-                    case "15":
-                        console.log("Vouch for tickets");
-                        break;
                     case "16":
                         console.log("Cancel ticket vouchers");
                         break;

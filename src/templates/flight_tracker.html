@@ -6,14 +6,14 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight list</title>
+    <title>Flight Tracker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
     {%block body%}
     <div style="margin:auto; text-align: center;">
-        <h1>Flight Tracker List</h1>
+        <h1>Flight Tracker</h1>
         <table id="flight-table">
             <thead>
                 <tr>
@@ -34,10 +34,11 @@
                 <h2 style="font-size: medium ;">Profile: {{login.role}}</h2>
                 <h3 style="font-size: small ;">Username: {%if admin%}{{admin[1]}} Email: {{admin[3]}}{%endif%} {%if
                     customer%}{{customer[1]}} Email: {{customer[3]}}{%endif%}{%if
-                    airline%}{{airline[1]}} Email:{{airline[3]}}{%endif%}<br></h3>
+                    airline%}{{airline[1]}} Email: {{airline[3]}}{%endif%}<br></h3>
                 {%else%}
                 <h1>Guest user : <a href='/login'>Login</a></h1>
                 {%endif%}
+                {%if flights%}
                 {% for flight in flights %}
                 <tr>
                     <td>{{ flight.id }}</td>
@@ -52,9 +53,14 @@
                         <button class="update-flight-btn" data-flight-id="{{ flight.id }}">Update</button>
 
                     </td>
+                    {%elif actions=='CUelevated'%}
+                    <td><button value="{{url_for('buy_ticket')}}" class="buy-ticket-btn"
+                            data-ticket-id="{{ flight.id }}" onclick="javascript:fetch('/buy_ticket')">Buy</button>
+                    </td>
                     {%endif%}
                 </tr>
                 {% endfor %}
+                {%endif%}
             </tbody>
         </table>
 
@@ -64,6 +70,10 @@
     </button>
     {%endblock%}
     <script>
+        function selectOption(option) {
+            window.location.href = option
+        };
+        //remove flight
         document.addEventListener('DOMContentLoaded', function () {
             var removeButtons = document.querySelectorAll('.remove-flight-btn');
             removeButtons.forEach(function (button) {
@@ -92,6 +102,7 @@
             });
         }
         );
+        //update flight
         document.addEventListener('DOMContentLoaded', function () {
             var updateButtons = document.querySelectorAll('.update-flight-btn');
             updateButtons.forEach(function (button) {
@@ -100,7 +111,19 @@
                     window.location.href = "/update_flight?flight_id=" + flightId;
                 });
             });
+        }
+        );
+        //buy ticket
+        document.addEventListener('DOMContentLoaded', function () {
+            var updateButtons = document.querySelectorAll('.buy-ticket-btn');
+            updateButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var ticketId = button.getAttribute('buy-ticket-btn');
+                    window.location.href = '';
+                });
+            });
         });
+
     </script>
 </body>
 

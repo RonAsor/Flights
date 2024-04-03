@@ -88,7 +88,6 @@ class Repository:
     #endregion    
         
     #region db_procedures
-    #needs uncluttering : log_and_execute, log    
     def get_airline_by_username(self, username: str) -> models.AirlineCompanies:
         query = "EXEC prc_get_airline_by_username @_username=:username"
         

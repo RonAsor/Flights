@@ -5,6 +5,11 @@ from flask import request
 from database import Session
 
 class FacadesBase():
+    '''
+    Date: 03/04/24
+    Author: Ron Asor
+    Description: Class to handle all inheriting classes user's available actions
+    '''
         
     def get_all_flights(self):
         session = Session()

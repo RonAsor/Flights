@@ -12,6 +12,11 @@ class Role():
     FLIGHTCOMPANY = 2
     CUSTOMER = 3
 class AnonymousFacade(FacadesBase):
+    '''
+    Date: 03/04/24
+    Author: Ron Asor
+    Description: Class to handle a Guest object user's available actions
+    '''
     
     def __init__(self):
         self.user = None
